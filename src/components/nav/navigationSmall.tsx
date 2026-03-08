@@ -4,7 +4,7 @@ import Box from '@mui/material/Box';
 import { type NavigateFunction } from "react-router-dom"
 import { Avatar, Backdrop, Collapse, Divider, IconButton, Paper, Typography } from '@mui/material';
 import { useState } from 'react';
-import { AccountCircleOutlined, Badge, DoorBackOutlined, DoorBackRounded, LogoutOutlined, Person } from '@mui/icons-material'
+import { AccountCircleOutlined, LogoutOutlined } from '@mui/icons-material'
 
 function NavAnonymous({ navigate }: { navigate: NavigateFunction }) {
     return <>
