@@ -35,7 +35,7 @@ export const counterSlice = createSlice({
     },
 })
 
-export const { removeUserInfomation } = counterSlice.actions
+export const { removeUserInfomation, setUserInfo } = counterSlice.actions
 
 // Other code such as selectors can use the imported `RootState` type
 // export const selectCount = (state: RootState) => state.counter.value
