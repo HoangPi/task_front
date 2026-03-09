@@ -2,22 +2,22 @@ import { createSlice, type PayloadAction } from '@reduxjs/toolkit'
 // import type { RootState } from '../store'
 
 // Define a type for the slice state
-interface User {
-    id: number | null,
+export interface User {
+    userId: number | null,
     username: string | null,
     name: string | null,
     email: string | null,
-    role: 'admin' | 'user',
+    role: 'ROLE_ADMIN' | 'ROLE_GUEST',
     notifications: number
 }
 
 // Define the initial state using that type
 const initialState: User = {
-    id: null,
+    userId: null,
     username: null,
     name: null,
     email: null,
-    role: 'user',
+    role: 'ROLE_GUEST',
     notifications: 0
 }
 
