@@ -1,10 +1,11 @@
-import { useAppSelector } from '../../redux/hook'
+import { useAppDispatch, useAppSelector } from '../../redux/hook'
 import Button from '@mui/material/Button';
 import Box from '@mui/material/Box';
 import { type NavigateFunction } from "react-router-dom"
 import { Avatar, Backdrop, Collapse, Divider, IconButton, Paper, Typography } from '@mui/material';
 import { useState } from 'react';
 import { AccountCircleOutlined, LogoutOutlined } from '@mui/icons-material'
+import { removeUserInfomation } from '../../redux/storage/user';
 
 function NavAnonymous({ navigate }: { navigate: NavigateFunction }) {
     return <>
@@ -15,6 +16,8 @@ function NavAnonymous({ navigate }: { navigate: NavigateFunction }) {
 
 function NavLoged({ navigate }: { navigate: NavigateFunction }) {
     const [expanded, setExpanded] = useState(false);
+    const user = useAppSelector((s) => s.user)
+    const dispatch = useAppDispatch()
 
     const handleToggle = () => {
         setExpanded((prev) => !prev);
@@ -55,17 +58,18 @@ function NavLoged({ navigate }: { navigate: NavigateFunction }) {
                         <Paper elevation={4} sx={{ p: 2, mt: 1 }}>
 
                             <Typography variant="subtitle1" sx={{ fontWeight: 'bold', textAlign: 'right' }}>
-                                Main Text
+                                {user.name}
                             </Typography>
 
                             <Typography variant="body2" sx={{ color: 'grey.800', mb: 2, textAlign: 'right' }}>
-                                Smaller, darker text
+                                {user.email}
                             </Typography>
 
                             {/* Profile Button - No outline, icon on right */}
                             <Button
                                 variant="text"
                                 fullWidth
+                                onClick={()=>navigate("/profile")}
                                 endIcon={<AccountCircleOutlined />}
                                 sx={{
                                     mb: 1, justifyContent: 'right', color: 'text.primary',
@@ -86,6 +90,11 @@ function NavLoged({ navigate }: { navigate: NavigateFunction }) {
                                 variant="text"
                                 fullWidth
                                 endIcon={<LogoutOutlined />}
+                                onClick={() => {
+                                    localStorage.removeItem("access")
+                                    dispatch(removeUserInfomation());
+                                    navigate("/")
+                                }}
                                 sx={{
                                     justifyContent: 'right', color: 'text.primary',
                                     transition: 'all 0.2s ease-in-out',

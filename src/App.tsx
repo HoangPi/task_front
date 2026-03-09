@@ -6,6 +6,7 @@ import { removeUserInfomation, setUserInfo } from "./redux/storage/user"
 import SignInPage from "./pages/signin"
 import { useEffect } from "react"
 import { VerifyUserSession } from "./service/user/userService"
+import ProfilePage from "./pages/profile"
 
 function App() {
   const dispatch = useAppDispatch()
@@ -25,6 +26,7 @@ function App() {
       <Routes>
         <Route index element={<HomePage />}></Route>
         <Route path="/signin" element={<SignInPage></SignInPage>} />
+        <Route path="/profile" element={<ProfilePage></ProfilePage>} />
       </Routes>
       <button onClick={() => {
         dispatch(removeUserInfomation())
