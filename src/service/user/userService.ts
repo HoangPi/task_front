@@ -1,7 +1,8 @@
 import type { User } from "../../redux/storage/user";
 import { axiosService } from "../axiosService";
+import { jwtDecode } from "jwt-decode"
 
-export function logIn(username: string, password: string): Promise<User>{
+export function logIn(username: string, password: string): Promise<User> {
     return axiosService({
         url: '/users/login',
         method: 'post',
@@ -11,7 +12,9 @@ export function logIn(username: string, password: string): Promise<User>{
         }
     })
         .then(response => {
-            return response.data as User
+            const user: User = jwtDecode<User>(response.data.token)
+            console.log(user)
+            return user
         })
         .catch(error => { throw error })
 }
