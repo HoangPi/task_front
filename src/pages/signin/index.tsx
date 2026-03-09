@@ -17,11 +17,33 @@ import Visibility from '@mui/icons-material/Visibility';
 import VisibilityOff from '@mui/icons-material/VisibilityOff';
 import LockOutlinedIcon from '@mui/icons-material/LockOutlined';
 import Avatar from '@mui/material/Avatar';
+import { useNavigate } from 'react-router-dom';
+import { UserService } from '../../service/user';
+import { useAppDispatch } from '../../redux/hook';
+import { setUserInfo } from '../../redux/storage/user';
 
 export default function SignInPage() {
+    const [username, setUsername] = useState('')
+    const [password, setPassword] = useState('')
+    const navigate = useNavigate();
+    const dispatch = useAppDispatch();
     const [showPassword, setShowPassword] = useState(false);
+    const [disabled, setDisable] = useState(false);
 
     const handleClickShowPassword = () => setShowPassword(!showPassword);
+
+    function handleLogin(): void {
+        UserService.logIn(username, password)
+            .then(user => {
+                dispatch(setUserInfo(user))
+                navigate("/")
+            })
+            .catch(error => {
+                console.log(error)
+                setDisable(false)
+            });
+        setDisable(true);
+    }
 
     return (
         <Box
@@ -60,10 +82,12 @@ export default function SignInPage() {
                             margin="normal"
                             required
                             fullWidth
-                            id="email"
-                            label="Email Address"
-                            name="email"
-                            autoComplete="email"
+                            id="username"
+                            label="username"
+                            name="username"
+                            autoComplete="username"
+                            defaultValue={username}
+                            onChange={(ev) => { setUsername(ev.target.value) }}
                             autoFocus
                         />
 
@@ -73,6 +97,8 @@ export default function SignInPage() {
                             fullWidth
                             name="password"
                             label="Password"
+                            onChange={(ev) => { setPassword(ev.target.value) }}
+                            defaultValue={password}
                             type={showPassword ? 'text' : 'password'}
                             id="password"
                             autoComplete="current-password"
@@ -95,8 +121,10 @@ export default function SignInPage() {
 
                         <Button
                             type="submit"
+                            onClick={handleLogin}
                             fullWidth
                             variant="contained"
+                            disabled={disabled}
                             sx={{
                                 mt: 3,
                                 mb: 2,
