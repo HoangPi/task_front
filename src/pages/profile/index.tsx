@@ -34,16 +34,16 @@ export default function ProfilePage() {
                     {/* Name */}
                     <TextField
                         label="Full Name"
-                        onChange={(ev)=>setEmail(ev.target.value)}
-                        defaultValue={user.name}
+                        onChange={(ev) => setName(ev.target.value)}
+                        defaultValue={name}
                         fullWidth
                     />
 
                     {/* Email */}
                     <TextField
                         label="Email Address"
-                        defaultValue={user.email}
-                        onChange={(ev)=>setEmail(ev.target.value)}
+                        defaultValue={email}
+                        onChange={(ev) => setEmail(ev.target.value)}
                         type="email"
                         fullWidth
                     />
