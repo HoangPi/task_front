@@ -110,6 +110,6 @@ function NavLoged({ navigate }: { navigate: NavigateFunction }) {
 export function NavSmall({ navigate }: { navigate: NavigateFunction }) {
     const user = useAppSelector(state => state.user)
     return <>
-        {user.id === null ? <NavAnonymous navigate={navigate}></NavAnonymous> : <NavLoged navigate={navigate}></NavLoged>}
+        {user.userId === null ? <NavAnonymous navigate={navigate}></NavAnonymous> : <NavLoged navigate={navigate}></NavLoged>}
     </>
 }
