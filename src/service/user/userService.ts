@@ -12,9 +12,7 @@ export function logIn(username: string, password: string): Promise<User> {
         }
     })
         .then(response => {
-            const user: User = jwtDecode<User>(response.data.token)
-            console.log(user)
-            return user
+            return jwtDecode<User>(response.data.token)
         })
         .catch(error => { throw error })
 }

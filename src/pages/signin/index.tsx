@@ -25,6 +25,7 @@ import { setUserInfo } from '../../redux/storage/user';
 export default function SignInPage() {
     const [username, setUsername] = useState('')
     const [password, setPassword] = useState('')
+    const [error, setError] = useState("")
     const navigate = useNavigate();
     const dispatch = useAppDispatch();
     const [showPassword, setShowPassword] = useState(false);
@@ -39,8 +40,10 @@ export default function SignInPage() {
                 navigate("/")
             })
             .catch(error => {
-                console.log(error)
                 setDisable(false)
+                setError(error.response.status === 404
+                    ? "Username or password is not correct"
+                    : "Server error, please try again after a moment");
             });
         setDisable(true);
     }
@@ -89,8 +92,10 @@ export default function SignInPage() {
                             defaultValue={username}
                             onChange={(ev) => { setUsername(ev.target.value) }}
                             autoFocus
+                            onFocus={()=>setError("")}
+                            error={error !== ""}
+                            helperText={error ? String(error) : ""} // This works because it's a string
                         />
-
                         <TextField
                             margin="normal"
                             required
@@ -102,6 +107,8 @@ export default function SignInPage() {
                             type={showPassword ? 'text' : 'password'}
                             id="password"
                             autoComplete="current-password"
+                            onFocus={()=>setError("")}
+                            error={error !== ""}
                             InputProps={{
                                 endAdornment: (
                                     <InputAdornment position="end">
