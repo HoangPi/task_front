@@ -12,7 +12,22 @@ export function logIn(username: string, password: string): Promise<User> {
         }
     })
         .then(response => {
+            localStorage.setItem("access", response.data.token)
             return jwtDecode<User>(response.data.token)
         })
         .catch(error => { throw error })
+}
+
+export async function VerifyUserSession(): Promise<User> {
+    try {
+        const userId = jwtDecode<User>(localStorage.getItem("access") || "").userId
+        const res = await axiosService({
+            url: `/users/${userId}`
+        })
+        res.data.userId = res.data.id
+        return res.data as User
+    }
+    catch (e) {
+        throw e
+    }
 }

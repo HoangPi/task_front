@@ -4,9 +4,20 @@ import { NavBar } from "./components/nav"
 import { useAppDispatch } from "./redux/hook"
 import { removeUserInfomation, setUserInfo } from "./redux/storage/user"
 import SignInPage from "./pages/signin"
+import { useEffect } from "react"
+import { VerifyUserSession } from "./service/user/userService"
 
 function App() {
   const dispatch = useAppDispatch()
+  useEffect(() => {
+    VerifyUserSession()
+      .then(res => dispatch(setUserInfo(res)))
+      .catch((e) => {
+        console.log(e);
+        localStorage.removeItem("access")
+        dispatch(removeUserInfomation())
+      })
+  }, [])
 
   return (
     <BrowserRouter>
@@ -15,8 +26,10 @@ function App() {
         <Route index element={<HomePage />}></Route>
         <Route path="/signin" element={<SignInPage></SignInPage>} />
       </Routes>
-      <button onClick={() => dispatch(setUserInfo({ id: 12, name: 'name', username: 'u', email: 'mail', role: 'user', notifications: 0 }))}>Set</button>
-      <button onClick={() => dispatch(removeUserInfomation())}>Remove</button>
+      <button onClick={() => {
+        dispatch(removeUserInfomation())
+        localStorage.removeItem("access")
+      }}>Remove</button>
     </BrowserRouter>
   )
 }
