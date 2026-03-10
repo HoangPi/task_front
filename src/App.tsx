@@ -28,7 +28,7 @@ function App() {
         <Route index element={<HomePage />}></Route>
         <Route path="/signin" element={<SignInPage></SignInPage>} />
         <Route path="/profile" element={<ProfilePage></ProfilePage>} />
-        <Route path="/dashboard" element={<DashboardPage></DashboardPage>} />
+        <Route path="/dashboard/*" element={<DashboardPage></DashboardPage>} />
       </Routes>
       <button onClick={() => {
         dispatch(removeUserInfomation())
