@@ -5,14 +5,14 @@ import type { RootState } from '../store'
 export interface TaskSummary {
     id: number;
     name: string;
-    createdAt: number;
-    hoursTotal: number;
-    hoursAssigned: number;
-    hoursDone: number;
-    hoursActuallyUsed: number;
-    jobsCompleted: number;
-    jobsAborted: number;
-    numberOfMembers: number;
+    created_at: number;
+    hours_total: number | null;
+    hours_assigned: number | null;
+    hours_done: number | null;
+    hours_actually_used: number | null;
+    jobs_completed: number | null;
+    jobs_aborted: number | null;
+    number_of_members: number;
 }
 
 // Define the initial state using that type
