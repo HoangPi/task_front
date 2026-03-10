@@ -12,13 +12,10 @@ import DashboardPage from "./pages/dashboard"
 function App() {
   const dispatch = useAppDispatch()
   const user = useAppSelector(state => state.user)
-  const navigate = useNavigate()
-  const location = useLocation()
   useEffect(() => {
     VerifyUserSession()
       .then(res => {
         dispatch(setUserInfo(res))
-        if (location.pathname !== '/') navigate('/')
       })
       .catch((e) => {
         console.log(e);

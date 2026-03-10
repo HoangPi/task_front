@@ -13,6 +13,7 @@ export interface TaskSummary {
     hours_actually_used: number;
     jobs_completed: number;
     jobs_aborted: number;
+    jobs_in_progress: number;
     number_of_members: number;
 }
 
