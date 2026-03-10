@@ -7,12 +7,12 @@ export interface TaskSummary {
     id: number;
     name: string;
     created_at: number;
-    hours_total: number | null;
-    hours_assigned: number | null;
-    hours_done: number | null;
-    hours_actually_used: number | null;
-    jobs_completed: number | null;
-    jobs_aborted: number | null;
+    hours_total: number;
+    hours_assigned: number;
+    hours_done: number;
+    hours_actually_used: number;
+    jobs_completed: number;
+    jobs_aborted: number;
     number_of_members: number;
 }
 
