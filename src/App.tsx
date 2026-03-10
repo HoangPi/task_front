@@ -1,7 +1,7 @@
-import { BrowserRouter, Routes, Route } from "react-router-dom"
+import { Routes, Route, useNavigate } from "react-router-dom"
 import HomePage from './pages/main/hompage'
 import { NavBar } from "./components/nav"
-import { useAppDispatch } from "./redux/hook"
+import { useAppDispatch, useAppSelector } from "./redux/hook"
 import { removeUserInfomation, setUserInfo } from "./redux/storage/user"
 import SignInPage from "./pages/signin"
 import { useEffect } from "react"
@@ -11,7 +11,13 @@ import DashboardPage from "./pages/dashboard"
 
 function App() {
   const dispatch = useAppDispatch()
+  const user = useAppSelector(state => state.user)
+  const navigate = useNavigate()
   useEffect(() => {
+    if(!user.userId && !localStorage.getItem('access'))
+    {
+      navigate('/')
+    }
     VerifyUserSession()
       .then(res => dispatch(setUserInfo(res)))
       .catch((e) => {
@@ -19,22 +25,21 @@ function App() {
         localStorage.removeItem("access")
         dispatch(removeUserInfomation())
       })
-  }, [])
+  }, [user])
 
-  return (
-    <BrowserRouter>
-      <NavBar />
-      <Routes>
-        <Route index element={<HomePage />}></Route>
-        <Route path="/signin" element={<SignInPage></SignInPage>} />
-        <Route path="/profile" element={<ProfilePage></ProfilePage>} />
-        <Route path="/dashboard/*" element={<DashboardPage></DashboardPage>} />
-      </Routes>
-      <button onClick={() => {
-        dispatch(removeUserInfomation())
-        localStorage.removeItem("access")
-      }}>Remove</button>
-    </BrowserRouter>
+  return (<>
+    <NavBar />
+    <Routes>
+      <Route index element={<HomePage />}></Route>
+      <Route path="/signin" element={<SignInPage></SignInPage>} />
+      <Route path="/profile" element={<ProfilePage></ProfilePage>} />
+      <Route path="/dashboard/*" element={<DashboardPage></DashboardPage>} />
+    </Routes>
+    <button onClick={() => {
+      dispatch(removeUserInfomation())
+      localStorage.removeItem("access")
+    }}>Remove</button>
+  </>
   )
 }
 
