@@ -1,6 +1,6 @@
 import { useDispatch, useSelector } from 'react-redux'
 import type { RootState, AppDispatch } from './store'
-import { addSummary, clearTasks, getTaskById } from './storage/taskSummary'
+import { addSummary, addSummaryBulk, clearTasks, getTaskById } from './storage/taskSummary'
 import { removeUserInfomation, setUserInfo } from './storage/user'
 
 // Use throughout your app instead of plain `useDispatch` and `useSelector`
@@ -13,6 +13,7 @@ export const reduxService = Object.freeze(
     {
         addSummary,
         clearTasks,
+        addSummaryBulk,
         getTaskById
     },
     userService:

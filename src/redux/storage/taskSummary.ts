@@ -1,5 +1,6 @@
 import { createSlice, type PayloadAction } from '@reduxjs/toolkit'
 import type { RootState } from '../store'
+import { userSlice } from './user';
 
 // Define a type for the slice state
 export interface TaskSummary {
@@ -26,11 +27,19 @@ export const taskSlice = createSlice({
         addSummary: (state, action: PayloadAction<TaskSummary>) => {
             state.tasks.push(action.payload)
         },
+        addSummaryBulk: (state, action: PayloadAction<TaskSummary[]>) => {
+            state.tasks = action.payload
+        },
         clearTasks: (state) => { state.tasks = [] }
     },
+    extraReducers: (builder) => {
+        builder.addCase(userSlice.actions.removeUserInfomation, (state) => {
+            state.tasks = []
+        })
+    }
 })
 
-export const { addSummary, clearTasks } = taskSlice.actions
+export const { addSummary, clearTasks, addSummaryBulk } = taskSlice.actions
 
 // Other code such as selectors can use the imported `RootState` type
 export const getTaskById = (state: RootState, id: number) => {
