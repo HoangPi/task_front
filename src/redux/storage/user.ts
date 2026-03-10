@@ -21,7 +21,7 @@ const initialState: User = {
     notifications: 0
 }
 
-export const counterSlice = createSlice({
+export const userSlice = createSlice({
     name: 'user',
     // `createSlice` will infer the state type from the `initialState` argument
     initialState,
@@ -35,9 +35,9 @@ export const counterSlice = createSlice({
     },
 })
 
-export const { removeUserInfomation, setUserInfo } = counterSlice.actions
+export const { removeUserInfomation, setUserInfo } = userSlice.actions
 
 // Other code such as selectors can use the imported `RootState` type
 // export const selectCount = (state: RootState) => state.counter.value
 
-export default counterSlice.reducer
+export default userSlice.reducer
