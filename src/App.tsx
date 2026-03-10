@@ -1,4 +1,4 @@
-import { Routes, Route, useNavigate } from "react-router-dom"
+import { Routes, Route, useNavigate, useLocation } from "react-router-dom"
 import HomePage from './pages/main/hompage'
 import { NavBar } from "./components/nav"
 import { useAppDispatch, useAppSelector } from "./redux/hook"
@@ -13,13 +13,13 @@ function App() {
   const dispatch = useAppDispatch()
   const user = useAppSelector(state => state.user)
   const navigate = useNavigate()
+  const location = useLocation()
   useEffect(() => {
-    if(!user.userId && !localStorage.getItem('access'))
-    {
-      navigate('/')
-    }
     VerifyUserSession()
-      .then(res => dispatch(setUserInfo(res)))
+      .then(res => {
+        dispatch(setUserInfo(res))
+        if (location.pathname !== '/') navigate('/')
+      })
       .catch((e) => {
         console.log(e);
         localStorage.removeItem("access")

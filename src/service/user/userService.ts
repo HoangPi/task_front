@@ -20,6 +20,9 @@ export function logIn(username: string, password: string): Promise<User> {
 
 export async function VerifyUserSession(): Promise<User> {
     try {
+        if(!localStorage.getItem("access")){
+            throw "Access token not found"
+        }
         const userId = jwtDecode<User>(localStorage.getItem("access") || "").userId
         const res = await axiosService({
             url: `/users/${userId}`
