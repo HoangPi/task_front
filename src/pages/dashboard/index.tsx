@@ -7,10 +7,14 @@ import {
     ListItemText,
     Toolbar
 } from '@mui/material';
+import { useLocation, useNavigate } from 'react-router-dom';
+import { ManagerOverview } from './manager';
 
 const drawerWidth = 240;
 
 export default function DashboardPage() {
+    const navigate = useNavigate();
+    const location = useLocation();
     return (
         <Box sx={{ display: 'flex' }}>
             {/* Note: This assumes your AppBar has a higher z-index (default is 1100).
@@ -34,13 +38,13 @@ export default function DashboardPage() {
             >
                 <List sx={{ pt: 2 }}>
                     <ListItem disablePadding>
-                        <ListItemButton>
+                        <ListItemButton onClick={() => navigate("/dashboard/manager")}>
                             <ListItemText primary="Manager tab" />
                         </ListItemButton>
                     </ListItem>
 
                     <ListItem disablePadding>
-                        <ListItemButton>
+                        <ListItemButton onClick={() => navigate("/dashboard/employee")}>
                             <ListItemText primary="Employee tab" />
                         </ListItemButton>
                     </ListItem>
@@ -60,7 +64,10 @@ export default function DashboardPage() {
                 <Toolbar />
 
                 <Box sx={{ p: 3 }}>
-                    {/* Main dashboard content goes here */}
+                    {location.pathname === '/dashboard/manager'
+                        ? <ManagerOverview />
+                        : <></>
+                    }
                 </Box>
             </Box>
         </Box>
