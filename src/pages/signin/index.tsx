@@ -17,6 +17,7 @@ import Visibility from '@mui/icons-material/Visibility';
 import VisibilityOff from '@mui/icons-material/VisibilityOff';
 import LockOutlinedIcon from '@mui/icons-material/LockOutlined';
 import Avatar from '@mui/material/Avatar';
+import { useNavigate } from 'react-router-dom';
 import { UserService } from '../../service/user';
 import { useAppDispatch } from '../../redux/hook';
 import { setUserInfo } from '../../redux/storage/user';
@@ -25,6 +26,7 @@ export default function SignInPage() {
     const [username, setUsername] = useState('')
     const [password, setPassword] = useState('')
     const [error, setError] = useState("")
+    const navigate = useNavigate();
     const dispatch = useAppDispatch();
     const [showPassword, setShowPassword] = useState(false);
     const [disabled, setDisable] = useState(false);
@@ -35,6 +37,7 @@ export default function SignInPage() {
         UserService.logIn(username, password)
             .then(user => {
                 dispatch(setUserInfo(user))
+                navigate("/")
             })
             .catch(error => {
                 setDisable(false)
