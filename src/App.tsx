@@ -7,6 +7,7 @@ import SignInPage from "./pages/signin"
 import { useEffect } from "react"
 import { VerifyUserSession } from "./service/user/userService"
 import ProfilePage from "./pages/profile"
+import DashboardPage from "./pages/dashboard"
 
 function App() {
   const dispatch = useAppDispatch()
@@ -27,6 +28,7 @@ function App() {
         <Route index element={<HomePage />}></Route>
         <Route path="/signin" element={<SignInPage></SignInPage>} />
         <Route path="/profile" element={<ProfilePage></ProfilePage>} />
+        <Route path="/dashboard" element={<DashboardPage></DashboardPage>} />
       </Routes>
       <button onClick={() => {
         dispatch(removeUserInfomation())

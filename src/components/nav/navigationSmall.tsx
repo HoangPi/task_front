@@ -30,8 +30,13 @@ function NavLoged({ navigate }: { navigate: NavigateFunction }) {
                 open={expanded}
                 onClick={() => setExpanded(false)}
             />
-
-            {/* The Interactive Container */}
+            <Button
+                color="inherit"
+                onClick={() => navigate("/dashboard")}
+                sx={{ mr: 2 }} // Adds space between this and the avatar
+            >
+                Dashboard
+            </Button>
             <Box
                 sx={{
                     position: 'relative',
@@ -69,7 +74,7 @@ function NavLoged({ navigate }: { navigate: NavigateFunction }) {
                             <Button
                                 variant="text"
                                 fullWidth
-                                onClick={()=>navigate("/profile")}
+                                onClick={() => navigate("/profile")}
                                 endIcon={<AccountCircleOutlined />}
                                 sx={{
                                     mb: 1, justifyContent: 'right', color: 'text.primary',
