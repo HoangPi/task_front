@@ -94,7 +94,7 @@ export const ManagerOverview = () => {
                 setWorks(workTemp)
             })
             .catch(err => console.log(err))
-    }, [timeSelector, tasks])
+    }, [timeSelector, selectedIndex])
 
     return (
         <Box sx={{ p: 3 }}>
