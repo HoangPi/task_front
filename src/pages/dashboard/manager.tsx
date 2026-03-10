@@ -13,14 +13,48 @@ import {
     Select,
     InputLabel,
     Paper,
-    Divider
+    Divider,
+    Stack,
+    Button
 } from "@mui/material"
-import { PieChart } from "@mui/x-charts"
+import { BarChart, PieChart } from "@mui/x-charts"
+import { ArrowBackIosNew, ArrowForwardIos } from "@mui/icons-material"
+import { WorkService, type WorkSummary } from "../../service/work/workService"
+
 
 export const ManagerOverview = () => {
     const dispatch = useAppDispatch()
     const tasks = useAppSelector(state => state.taskStorage.tasks)
+    let [works, setWorks] = useState<WorkSummary[]>([])
     const [selectedIndex, setSelectedIndex] = useState(0)
+    const [timeSelector, setTimeSelector] = useState({
+        quarter: Math.floor(new Date().getMonth() / 3) + 1,
+        year: new Date().getFullYear()
+    })
+    const handleUpdateTimeSelector = (up: boolean): void => {
+        if (timeSelector.quarter >= 4 && up) {
+            setTimeSelector({
+                quarter: 1,
+                year: timeSelector.year + 1
+            })
+        }
+        else if (timeSelector.quarter <= 1 && !up) {
+            setTimeSelector({
+                quarter: 4,
+                year: timeSelector.year - 1
+            })
+        }
+        else {
+            setTimeSelector({
+                quarter: timeSelector.quarter + (up ? 1 : -1),
+                year: timeSelector.year
+            })
+        }
+    }
+
+    const allMonths = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+    const startIndex = (timeSelector.quarter - 1) * 3;
+    const currentMonths = allMonths.slice(startIndex, startIndex + 3);
 
     useEffect(() => {
         taskService.getTasksManagedByUser()
@@ -31,6 +65,36 @@ export const ManagerOverview = () => {
                 console.log(e)
             })
     }, [])
+
+    useEffect(() => {
+        if (!tasks.length) {
+            return
+        }
+        WorkService.getWorkSummary(tasks[selectedIndex].id, timeSelector.quarter, timeSelector.year)
+            .then(res => {
+                let workTemp: WorkSummary[] = []
+                for (let i = 1; i <= 3; i++) {
+                    workTemp.push({
+                        id: 0,
+                        month: (timeSelector.quarter - 1) * 3 + i,
+                        year: timeSelector.year,
+                        hours_actually_used: 0,
+                        hours_done: 0,
+                        hours_total: 0
+                    })
+                }
+                res.forEach(item => {
+                    console.log(item)
+                    workTemp.forEach((temp, index) => {
+                        if (temp.month === item.month && temp.year === item.year) {
+                            Object.assign(workTemp[index], item)
+                        }
+                    })
+                })
+                setWorks(workTemp)
+            })
+            .catch(err => console.log(err))
+    }, [timeSelector, tasks])
 
     return (
         <Box sx={{ p: 3 }}>
@@ -103,9 +167,9 @@ export const ManagerOverview = () => {
                                             series={[
                                                 {
                                                     data: [
-                                                        {id: 0, value: tasks[selectedIndex].jobs_completed, label: `Tasks completed ${(tasks[selectedIndex].jobs_completed/(tasks[selectedIndex].jobs_in_progress + tasks[selectedIndex].jobs_completed + tasks[selectedIndex].jobs_in_progress) * 100).toPrecision(2)}%`},
-                                                        {id: 1, value: tasks[selectedIndex].jobs_in_progress, label: `Tasks on going ${(tasks[selectedIndex].jobs_in_progress/(tasks[selectedIndex].jobs_in_progress + tasks[selectedIndex].jobs_completed + tasks[selectedIndex].jobs_in_progress) * 100).toPrecision(2)}%`},
-                                                        {id: 2, value: tasks[selectedIndex].jobs_aborted, label: `Tasks failed ${(tasks[selectedIndex].jobs_aborted/(tasks[selectedIndex].jobs_in_progress + tasks[selectedIndex].jobs_completed + tasks[selectedIndex].jobs_in_progress) * 100).toPrecision(2)}%`},
+                                                        { id: 0, value: tasks[selectedIndex].jobs_completed, label: `Tasks completed ${(tasks[selectedIndex].jobs_completed / (tasks[selectedIndex].jobs_in_progress + tasks[selectedIndex].jobs_completed + tasks[selectedIndex].jobs_in_progress) * 100).toPrecision(2)}%` },
+                                                        { id: 1, value: tasks[selectedIndex].jobs_in_progress, label: `Tasks on going ${(tasks[selectedIndex].jobs_in_progress / (tasks[selectedIndex].jobs_in_progress + tasks[selectedIndex].jobs_completed + tasks[selectedIndex].jobs_in_progress) * 100).toPrecision(2)}%` },
+                                                        { id: 2, value: tasks[selectedIndex].jobs_aborted, label: `Tasks failed ${(tasks[selectedIndex].jobs_aborted / (tasks[selectedIndex].jobs_in_progress + tasks[selectedIndex].jobs_completed + tasks[selectedIndex].jobs_in_progress) * 100).toPrecision(2)}%` },
                                                     ],
                                                     innerRadius: 30, // Creates a slight donut shape
                                                     outerRadius: 80,
@@ -132,18 +196,46 @@ export const ManagerOverview = () => {
 
                     {/* 3. Bar Chart Representation (3 Metrics per month) */}
                     <Typography variant="h6" sx={{ mb: 2 }}>Monthly Performance Metrics</Typography>
-                    <Paper elevation={1} sx={{ p: 4, display: 'flex', alignItems: 'flex-end', justifyContent: 'space-around', height: 300, bgcolor: '#fafafa' }}>
-                        {['Jan', 'Feb', 'Mar'].map((month) => (
-                            <Box key={month} sx={{ textAlign: 'center', width: '20%' }}>
-                                <Box sx={{ display: 'flex', alignItems: 'flex-end', justifyContent: 'center', gap: 1, height: 200, mb: 1 }}>
-                                    {/* Visual Bar representation */}
-                                    <Box sx={{ bgcolor: 'primary.main', width: 15, height: `${Math.random() * 100 + 20}%`, borderRadius: '4px 4px 0 0' }} />
-                                    <Box sx={{ bgcolor: 'secondary.main', width: 15, height: `${Math.random() * 100 + 20}%`, borderRadius: '4px 4px 0 0' }} />
-                                    <Box sx={{ bgcolor: 'success.main', width: 15, height: `${Math.random() * 100 + 20}%`, borderRadius: '4px 4px 0 0' }} />
-                                </Box>
-                                <Typography variant="caption">{month}</Typography>
+                    <Paper elevation={2} sx={{ p: 4, bgcolor: '#ffffff', borderRadius: 2 }}>
+                        <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ mb: 3 }}>
+                            <Typography variant="h6">
+                                Performance: Q{timeSelector.quarter} {timeSelector.year}
+                            </Typography>
+
+                            <Box>
+                                <Button
+                                    size="small"
+                                    onClick={() => handleUpdateTimeSelector(false)}
+                                    startIcon={<ArrowBackIosNew />}
+                                    sx={{ mr: 1 }}
+                                >
+                                    Prev Quarter
+                                </Button>
+                                <Button
+                                    size="small"
+                                    onClick={() => handleUpdateTimeSelector(true)}
+                                    endIcon={<ArrowForwardIos />}
+                                >
+                                    Next Quarter
+                                </Button>
                             </Box>
-                        ))}
+                        </Stack>
+
+                        <Box sx={{ width: '100%', height: 350 }}>
+                            <BarChart
+                                xAxis={[{
+                                    scaleType: 'band',
+                                    data: currentMonths,
+                                }]}
+                                series={[
+                                    { data: works.map((i) => i.hours_done), label: 'Hours done', color: '#42a5f5' },
+                                    { data: works.map((i) => i.hours_actually_used), label: 'Hours userd', color: '#ab47bc' },
+                                    { data: works.map((i) => i.hours_total), label: 'Total hours', color: '#81c784' },
+                                ]}
+                                height={300}
+                            // tooltip={{ trigger: 'item' }}
+                            />
+                        </Box>
                     </Paper>
                 </>
                 : <></>
