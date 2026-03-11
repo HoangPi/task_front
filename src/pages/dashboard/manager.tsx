@@ -94,7 +94,7 @@ export const ManagerOverview = () => {
                 setWorks(workTemp)
             })
             .catch(err => console.log(err))
-    }, [timeSelector, selectedIndex])
+    }, [timeSelector, selectedIndex, tasks.length])
 
     return (
         <Box sx={{ p: 3 }}>
@@ -133,6 +133,8 @@ export const ManagerOverview = () => {
                                     <Typography variant="body2" color="text.secondary">Hours into the project</Typography>
                                     <Typography variant="h5" sx={{ mt: 2, color: 'orange' }}>{tasks[selectedIndex].hours_assigned}</Typography>
                                     <Typography variant="body2" color="text.secondary">Hours spent</Typography>
+                                    <Typography variant="h5" sx={{ mt: 2, color: 'green' }}>{tasks[selectedIndex].hours_actually_used}</Typography>
+                                    <Typography variant="body2" color="text.secondary">Hours actually used</Typography>
                                 </CardContent>
                             </Card>
                         </Grid>
@@ -145,98 +147,67 @@ export const ManagerOverview = () => {
                                         Management efficiency
                                     </Typography>
                                     <Divider sx={{ my: 1 }} />
-                                    <Typography variant="h4" sx={{ mt: 2 }}>{tasks[selectedIndex].hours_done}</Typography>
-                                    <Typography variant="body2" color="text.secondary">Hours completed</Typography>
-                                    <Typography variant="h5" sx={{ mt: 2, color: 'green' }}>{tasks[selectedIndex].hours_actually_used}</Typography>
-                                    <Typography variant="body2" color="text.secondary">Hours actually used</Typography>
+                                    <Typography variant="h4" sx={{ mt: 2 }}>{tasks[selectedIndex].jobs_completed}</Typography>
+                                    <Typography variant="body2" color="text.secondary">Jobs completed</Typography>
+                                    <Typography variant="h5" sx={{ mt: 2, color: 'green' }}>{tasks[selectedIndex].jobs_in_progress}</Typography>
+                                    <Typography variant="body2" color="text.secondary">On going job</Typography>
+                                    <Typography variant="h5" sx={{ mt: 2, color: 'red' }}>{tasks[selectedIndex].jobs_aborted}</Typography>
+                                    <Typography variant="body2" color="text.secondary">Job failed</Typography>
                                 </CardContent>
                             </Card>
                         </Grid>
 
-                        {/* Card 3: Financials */}
-                        <Grid size={{ xs: 12, md: 12 }}>
-                            <Card elevation={3} sx={{ height: '100%' }}>
-                                <CardContent>
-                                    <Typography variant="h6" sx={{ color: 'success.main' }} gutterBottom>
-                                        Budget Allocation
-                                    </Typography>
-                                    <Divider sx={{ my: 1, mb: 2 }} />
 
-                                    <Box sx={{ display: 'flex', justifyContent: 'center', height: 160 }}>
-                                        <PieChart
-                                            series={[
-                                                {
-                                                    data: [
-                                                        { id: 0, value: tasks[selectedIndex].jobs_completed, label: `Tasks completed ${(tasks[selectedIndex].jobs_completed / (tasks[selectedIndex].jobs_in_progress + tasks[selectedIndex].jobs_completed + tasks[selectedIndex].jobs_in_progress) * 100).toPrecision(2)}%` },
-                                                        { id: 1, value: tasks[selectedIndex].jobs_in_progress, label: `Tasks on going ${(tasks[selectedIndex].jobs_in_progress / (tasks[selectedIndex].jobs_in_progress + tasks[selectedIndex].jobs_completed + tasks[selectedIndex].jobs_in_progress) * 100).toPrecision(2)}%` },
-                                                        { id: 2, value: tasks[selectedIndex].jobs_aborted, label: `Tasks failed ${(tasks[selectedIndex].jobs_aborted / (tasks[selectedIndex].jobs_in_progress + tasks[selectedIndex].jobs_completed + tasks[selectedIndex].jobs_in_progress) * 100).toPrecision(2)}%` },
-                                                    ],
-                                                    innerRadius: 30, // Creates a slight donut shape
-                                                    outerRadius: 80,
-                                                    paddingAngle: 2,
-                                                    cornerRadius: 4,
-                                                    highlightScope: { fade: 'global', highlight: 'item' },
-                                                    faded: { innerRadius: 30, additionalRadius: -30, color: 'gray' },
-                                                },
-                                            ]}
-                                            height={160}
-                                            margin={{ top: 0, bottom: 0, left: 0, right: 100 }}
-                                            slotProps={{
-                                                legend: {
-                                                    direction: 'vertical',
-                                                    position: { vertical: 'middle', horizontal: 'end' },
-                                                },
-                                            }}
-                                        />
+                        {/* 3. Bar Chart Representation (3 Metrics per month) */}
+                        <Grid size={12}>
+                            <Typography variant="h6" sx={{ mb: 2 }}>Monthly Performance Metrics</Typography>
+                            <Paper elevation={2} sx={{ p: 4, bgcolor: '#ffffff', borderRadius: 2 }}>
+                                <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ mb: 3 }}>
+                                    <Typography variant="h6">
+                                        Performance: Q{timeSelector.quarter} {timeSelector.year}
+                                    </Typography>
+
+                                    <Box>
+                                        <Button
+                                            size="small"
+                                            onClick={() => handleUpdateTimeSelector(false)}
+                                            startIcon={<ArrowBackIosNew />}
+                                            sx={{ mr: 1 }}
+                                        >
+                                            Prev Quarter
+                                        </Button>
+                                        <Button
+                                            size="small"
+                                            onClick={() => handleUpdateTimeSelector(true)}
+                                            endIcon={<ArrowForwardIos />}
+                                        >
+                                            Next Quarter
+                                        </Button>
                                     </Box>
-                                </CardContent>
-                            </Card>
+                                </Stack>
+
+                                <Box sx={{ width: '100%', height: 350 }}>
+                                    <BarChart
+                                        xAxis={[{
+                                            scaleType: 'band',
+                                            data: currentMonths,
+                                        }]}
+                                        series={[
+                                            { data: works.map((i) => i.hours_done), label: 'Hours done', color: '#42a5f5' },
+                                            { data: works.map((i) => i.hours_actually_used), label: 'Hours userd', color: '#ab47bc' },
+                                            { data: works.map((i) => i.hours_total), label: 'Total hours', color: '#81c784' },
+                                        ]}
+                                        height={300}
+                                    // tooltip={{ trigger: 'item' }}
+                                    />
+                                </Box>
+                                <Grid size={{ xs: 12, md: 12 }}>
+
+                                </Grid>
+                            </Paper>
                         </Grid>
                     </Grid>
 
-                    {/* 3. Bar Chart Representation (3 Metrics per month) */}
-                    <Typography variant="h6" sx={{ mb: 2 }}>Monthly Performance Metrics</Typography>
-                    <Paper elevation={2} sx={{ p: 4, bgcolor: '#ffffff', borderRadius: 2 }}>
-                        <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ mb: 3 }}>
-                            <Typography variant="h6">
-                                Performance: Q{timeSelector.quarter} {timeSelector.year}
-                            </Typography>
-
-                            <Box>
-                                <Button
-                                    size="small"
-                                    onClick={() => handleUpdateTimeSelector(false)}
-                                    startIcon={<ArrowBackIosNew />}
-                                    sx={{ mr: 1 }}
-                                >
-                                    Prev Quarter
-                                </Button>
-                                <Button
-                                    size="small"
-                                    onClick={() => handleUpdateTimeSelector(true)}
-                                    endIcon={<ArrowForwardIos />}
-                                >
-                                    Next Quarter
-                                </Button>
-                            </Box>
-                        </Stack>
-
-                        <Box sx={{ width: '100%', height: 350 }}>
-                            <BarChart
-                                xAxis={[{
-                                    scaleType: 'band',
-                                    data: currentMonths,
-                                }]}
-                                series={[
-                                    { data: works.map((i) => i.hours_done), label: 'Hours done', color: '#42a5f5' },
-                                    { data: works.map((i) => i.hours_actually_used), label: 'Hours userd', color: '#ab47bc' },
-                                    { data: works.map((i) => i.hours_total), label: 'Total hours', color: '#81c784' },
-                                ]}
-                                height={300}
-                            // tooltip={{ trigger: 'item' }}
-                            />
-                        </Box>
-                    </Paper>
                 </>
                 : <></>
             }
