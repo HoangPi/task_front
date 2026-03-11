@@ -9,7 +9,7 @@ import {
     Toolbar
 } from '@mui/material';
 import { Route, Routes, useNavigate } from 'react-router-dom';
-import { ManagerOverview } from './manager';
+import { ManagerOverview } from './manager/manager';
 import { ExpandLess, ExpandMore } from '@mui/icons-material';
 import { useState } from 'react';
 import SignInPage from '../signin';

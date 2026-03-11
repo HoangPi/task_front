@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react"
-import { taskService } from "../../service/task/taskService"
-import { reduxService, useAppDispatch, useAppSelector } from "../../redux/hook"
+import { taskService } from "../../../service/task/taskService"
+import { reduxService, useAppDispatch, useAppSelector } from "../../../redux/hook"
 // New MUI Imports
 import {
     Box,
@@ -19,7 +19,7 @@ import {
 } from "@mui/material"
 import { BarChart } from "@mui/x-charts"
 import { ArrowBackIosNew, ArrowForwardIos } from "@mui/icons-material"
-import { WorkService, type WorkSummary } from "../../service/work/workService"
+import { WorkService, type WorkSummary } from "../../../service/work/workService"
 
 
 export const ManagerOverview = () => {
