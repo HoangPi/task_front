@@ -17,7 +17,7 @@ import {
     Stack,
     Button
 } from "@mui/material"
-import { BarChart, PieChart } from "@mui/x-charts"
+import { BarChart } from "@mui/x-charts"
 import { ArrowBackIosNew, ArrowForwardIos } from "@mui/icons-material"
 import { WorkService, type WorkSummary } from "../../service/work/workService"
 
