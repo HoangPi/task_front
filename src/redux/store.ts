@@ -1,12 +1,12 @@
 import { configureStore } from '@reduxjs/toolkit'
 import userReducer from './storage/user'
-import taskRecucer from "./storage/taskSummary"
+import projectReducer from './storage/project'
 // ...
 
 export const store = configureStore({
     reducer: {
         user: userReducer,
-        taskStorage: taskRecucer
+        projectStorage: projectReducer
     },
 })
 

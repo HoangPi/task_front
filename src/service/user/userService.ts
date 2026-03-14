@@ -23,9 +23,8 @@ export async function VerifyUserSession(): Promise<User> {
         if(!localStorage.getItem("access")){
             throw "Access token not found"
         }
-        const userId = jwtDecode<User>(localStorage.getItem("access") || "").userId
         const res = await axiosService({
-            url: `/users/${userId}`
+            url: `/users`
         })
         res.data.userId = res.data.id
         return res.data as User

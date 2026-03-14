@@ -6,7 +6,7 @@ import { removeUserInfomation, setUserInfo } from "./redux/storage/user"
 import SignInPage from "./pages/signin"
 import { useEffect } from "react"
 import { VerifyUserSession } from "./service/user/userService"
-import DashboardPage from "./pages/dashboard"
+import SidebarLayout from "./pages/project/board"
 
 function App() {
   const dispatch = useAppDispatch()
@@ -25,15 +25,13 @@ function App() {
 
   return (<>
     <NavBar />
-    {user.userId ?
-      <DashboardPage />
-      : <Routes>
-        <Route index element={<HomePage />}></Route>
-        <Route path="/signin" element={<SignInPage></SignInPage>} />
-        {/* <Route path="/profile" element={<ProfilePage></ProfilePage>} /> */}
-        {/* <Route path="/dashboard/manager" element={<ManagerOverview></ManagerOverview>} /> */}
-      </Routes>
-    }
+    <Routes>
+      <Route index element={<HomePage />}></Route>
+      <Route path="/signin" element={<SignInPage></SignInPage>} />
+      {user.userId ? <>
+        <Route path="/dashboard" element={<SidebarLayout />}></Route>
+      </> : <></>}
+    </Routes>
     <button onClick={() => {
       dispatch(removeUserInfomation())
       localStorage.removeItem("access")
