@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import {
   Box,
   Drawer,
@@ -23,16 +23,55 @@ import {
   History,
   Timer,
 } from '@mui/icons-material';
+import { SelectedIndexContext } from '../selectItemContext';
+import { service } from '../../../service';
+import { useAppDispatch, useAppSelector } from '../../../redux/hook';
+import { addProjectBulk } from '../../../redux/storage/project';
+import AzureBoard from './board';
 
 const drawerWidth = 260;
 
 export default function SidebarLayout() {
+  const [selectedItem, setSelectedItem] = useState(-1)
+  const [firstRender, setFirstRender] = useState(true);
+  const projects = useAppSelector((s) => s.projectStorage.projects)
+  const dispatch = useAppDispatch()
   const [openOverview, setOpenOverview] = useState(true);
   const [openBoards, setOpenBoards] = useState(true);
-  const [project, setProject] = useState('10');
 
   const handleOverviewClick = () => setOpenOverview(!openOverview);
   const handleBoardsClick = () => setOpenBoards(!openBoards);
+
+  useEffect(() => {
+    service.projectService.getProjects()
+      .then(result => {
+        if(result.length){
+          setSelectedItem(0)
+          dispatch(addProjectBulk(result))
+        }
+        throw "EMPTY"
+      })
+      .catch(e => console.log(e))
+      .finally(() => {
+        // This ensures the white screen disappears whether the call succeeded or failed
+        setFirstRender(false);
+      });
+  }, [])
+
+  if (firstRender) {
+    return (
+      <Box 
+        sx={{ 
+          position: 'fixed', 
+          top: 0, 
+          left: 0, 
+          width: '100vw', 
+          height: '100vh', 
+          bgcolor: 'white', 
+        }} 
+      />
+    );
+  }
 
   return (
     <Box sx={{ display: 'flex' }}>
@@ -56,13 +95,11 @@ export default function SidebarLayout() {
             <InputLabel id="project-select-label">Project</InputLabel>
             <Select
               labelId="project-select-label"
-              value={project}
+              value={selectedItem}
               label="Project"
-              onChange={(e) => setProject(e.target.value)}
+              onChange={(e) => setSelectedItem(e.target.value)}
             >
-              <MenuItem value={10}>Marketing Team</MenuItem>
-              <MenuItem value={20}>Dev Operations</MenuItem>
-              <MenuItem value={30}>Product Design</MenuItem>
+              {projects.map((item, index)=><MenuItem value={index}>{item.name}</MenuItem>)}
             </Select>
           </FormControl>
         </Box>
@@ -116,15 +153,18 @@ export default function SidebarLayout() {
       </Drawer>
 
       {/* Main Content Area */}
-      <Box
-        component="main"
-        sx={{ flexGrow: 1, bgcolor: 'background.default', p: 3, minHeight: '100vh' }}
-      >
-        <Typography variant="h4">Main Content</Typography>
-        <Typography paragraph>
-          This area will stay to the right of your fixed sidebar.
-        </Typography>
-      </Box>
+      <SelectedIndexContext value={{ value: selectedItem, dispatcher: setSelectedItem }}>
+        <Box
+          component="main"
+          sx={{ flexGrow: 1, bgcolor: 'background.default', p: 3, minHeight: '100vh' }}
+        >
+          <Typography variant="h4">{projects.length ? projects[selectedItem].name : "You do not belong"}</Typography>
+          <Typography paragraph>
+            {projects.length ? projects[selectedItem].description : ""}
+          </Typography>
+          <AzureBoard />
+        </Box>
+      </SelectedIndexContext>
     </Box>
   );
 }

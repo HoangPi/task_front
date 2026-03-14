@@ -29,7 +29,7 @@ function App() {
       <Route index element={<HomePage />}></Route>
       <Route path="/signin" element={<SignInPage></SignInPage>} />
       {user.userId ? <>
-        <Route path="/dashboard" element={<SidebarLayout />}></Route>
+        <Route path="/dashboard/*" element={<SidebarLayout />}></Route>
       </> : <></>}
     </Routes>
     <button onClick={() => {
