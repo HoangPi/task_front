@@ -2,6 +2,7 @@ import { useDispatch, useSelector } from 'react-redux'
 import type { RootState, AppDispatch } from './store'
 import { removeUserInfomation, setUserInfo } from './storage/user'
 import { addProject, addProjectBulk, clearProject, getProjectById } from './storage/project'
+import { getNeighborSprint, getSprintById, pushBack, pushFront } from './storage/sprint'
 
 // Use throughout your app instead of plain `useDispatch` and `useSelector`
 export const useAppDispatch = useDispatch.withTypes<AppDispatch>()
@@ -20,5 +21,11 @@ export const reduxService = Object.freeze(
     {
         setUserInfo,
         removeUserInfomation
-    }
+    },
+    sprintservice : {
+        pushBack,
+        pushFront,
+        getSprintById,
+        getNeighborSprint
+    },
 })

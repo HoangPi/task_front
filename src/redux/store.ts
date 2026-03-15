@@ -8,7 +8,7 @@ export const store = configureStore({
     reducer: {
         user: userReducer,
         projectStorage: projectReducer,
-        sprintStorage: sprintReducer
+        sprintStorage: sprintReducer,
     },
 })
 

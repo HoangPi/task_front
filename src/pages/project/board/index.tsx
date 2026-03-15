@@ -27,7 +27,8 @@ import { SelectedIndexContext } from '../selectItemContext';
 import { service } from '../../../service';
 import { useAppDispatch, useAppSelector } from '../../../redux/hook';
 import { addProjectBulk } from '../../../redux/storage/project';
-import AzureBoard from './board';
+import { BoardSelector } from './selector';
+import { useLocation, useNavigate } from 'react-router-dom';
 
 const drawerWidth = 260;
 
@@ -38,6 +39,8 @@ export default function SidebarLayout() {
   const dispatch = useAppDispatch()
   const [openOverview, setOpenOverview] = useState(true);
   const [openBoards, setOpenBoards] = useState(true);
+  const location = useLocation();
+  const navigate = useNavigate()
 
   const handleOverviewClick = () => setOpenOverview(!openOverview);
   const handleBoardsClick = () => setOpenBoards(!openBoards);
@@ -48,6 +51,7 @@ export default function SidebarLayout() {
         if(result.length){
           setSelectedItem(0)
           dispatch(addProjectBulk(result))
+          return;
         }
         throw "EMPTY"
       })
@@ -135,11 +139,11 @@ export default function SidebarLayout() {
           </ListItemButton>
           <Collapse in={openBoards} timeout="auto" unmountOnExit>
             <List component="div" disablePadding>
-              <ListItemButton sx={{ pl: 4 }}>
+              <ListItemButton onClick={()=>navigate("/dashboard/board")} sx={{ pl: 4 }}>
                 <ListItemIcon><ViewKanban fontSize="small" /></ListItemIcon>
                 <ListItemText primary="Boards" />
               </ListItemButton>
-              <ListItemButton sx={{ pl: 4 }}>
+              <ListItemButton onClick={()=>navigate("/dashboard/backlog")} sx={{ pl: 4 }}>
                 <ListItemIcon><History fontSize="small" /></ListItemIcon>
                 <ListItemText primary="Backlogs" />
               </ListItemButton>
@@ -162,7 +166,7 @@ export default function SidebarLayout() {
           <Typography paragraph>
             {projects.length ? projects[selectedItem].description : ""}
           </Typography>
-          <AzureBoard />
+          <BoardSelector path={location.pathname}/>
         </Box>
       </SelectedIndexContext>
     </Box>

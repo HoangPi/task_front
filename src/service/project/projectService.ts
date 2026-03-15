@@ -1,3 +1,4 @@
+import type { Backlog } from "../../redux/storage/backlog"
 import type { Project } from "../../redux/storage/project"
 import type { Sprint } from "../../redux/storage/sprint"
 import { axiosService } from "../axiosService"
@@ -8,23 +9,42 @@ export function getProjects(): Promise<Project[]> {
         method: "GET"
     })
         .then(res => {
-            console.log(res.data)
             return res.data as Project[]
         })
         .catch(e => { throw e })
 }
 
-export function getCurrentSprint(projectId: number): Promise<Sprint[]> {
-    const today = new Date();
-    const todayString = `${today.getFullYear()}-${today.getMonth() + 1}-${today.getDate()}`
-    const url = `sprints?projectId=${projectId}&start=${todayString}&end=${todayString}`
+export function getCurrentSprint(projectId: number, date?: string, before?: boolean): Promise<Sprint[]> {
+    let startDate = new Date();
+    let endDate = new Date();
+    if (date) {
+        if (before) {
+            startDate = new Date("1970-01-01");
+            endDate = new Date(date)
+            endDate.setDate(endDate.getDate() - 1)
+        }
+        else {
+            endDate = new Date("9999-1-1")
+            startDate = new Date(date)
+            startDate.setDate(startDate.getDate() + 1)
+        }
+    }
+    const startDateString = `${startDate.getFullYear()}-${startDate.getMonth() + 1}-${startDate.getDate()}`
+    const endDateString = `${endDate.getFullYear()}-${endDate.getMonth() + 1}-${endDate.getDate()}`
+    const url = `sprints?projectId=${projectId}&start=${startDateString}&end=${endDateString}`
     return axiosService({
         url,
         method: "GET"
     })
         .then(res => {
-            console.log(res.data)
             return res.data as Sprint[]
         })
         .catch(e => { throw e })
+}
+
+export function getSprintBacklogBySprintId(sprintId: number) {
+    return axiosService({
+        url: `/sprints/backlog?sprintId=${sprintId}`,
+        method: "GET"
+    }).then(res => res.data as Backlog[]).catch(e => { throw e })
 }
