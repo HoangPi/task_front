@@ -10,7 +10,7 @@ import {
     Divider,
     LinearProgress,
 } from '@mui/material';
-import { Add, MoreHoriz,ChevronRight, ChevronLeft } from '@mui/icons-material';
+import { Add, MoreHoriz, ChevronRight, ChevronLeft } from '@mui/icons-material';
 import { SelectedIndexContext } from '../selectItemContext';
 import { service } from '../../../service';
 import { reduxService, useAppDispatch, useAppSelector } from '../../../redux/hook';
@@ -242,76 +242,79 @@ export default function AzureBoard() {
             </div>
 
             {/* Board Columns */}
-            <Box sx={{ display: 'flex', gap: 2, overflowX: 'auto', pb: 2, flexGrow: 1 }}>
+            <Box sx={{ display: 'flex', gap: 2, overflowX: 'auto', pb: 2, flexGrow: 1, alignItems: 'stretch' }}>
                 {[
                     ["Created", "created"],
                     ["Active", "on_going"],
                     ["Waiting Review", "in_review"],
                     ["Completed", "finished"],
-                    ["Failed", "failed"]].map(item =>
-                        <>
-                            <Box
-                                key={item[0]}
+                    ["Failed", "failed"]
+                ].map(item => (
+                    <Box
+                        key={item[0]}
+                        sx={{
+                            flex: 1,
+                            minWidth: 0,
+                            bgcolor: '#f5f5f5',
+                            borderRadius: 1,
+                            display: 'flex',
+                            flexDirection: 'column',
+                            // Change: Set to 100% so it stretches to the height of the parent
+                            height: '100%',
+                            border: '1px solid #e1e4e8'
+                        }}
+                    >
+                        {/* Column Header */}
+                        <Box sx={{ p: 1, display: 'flex', alignItems: 'center', gap: 1 }}>
+                            <Box sx={{ width: 10, height: 10, borderRadius: '50%', bgcolor: 'blue' }} />
+                            <Typography
+                                variant="subtitle2"
                                 sx={{
-                                    // Change: Use flex: 1 to distribute 5 columns equally (20% each)
-                                    flex: 1,
-                                    minWidth: 0, // Critical for flex children to allow shrinking
-                                    bgcolor: '#f5f5f5',
-                                    borderRadius: 1,
-                                    minHeight: '60vh',
-                                    display: 'flex',
-                                    flexDirection: 'column',
-                                    height: 'fit-content', // Or '100%' depending on your layout
-                                    border: '1px solid #e1e4e8' // Adding a subtle border for definition
+                                    fontWeight: 700,
+                                    fontSize: '0.8rem',
+                                    whiteSpace: 'nowrap',
+                                    overflow: 'hidden',
+                                    textOverflow: 'ellipsis'
                                 }}
                             >
-                                {/* Column Header */}
-                                <Box sx={{ p: 1, display: 'flex', alignItems: 'center', gap: 1 }}>
-                                    <Box sx={{ width: 10, height: 10, borderRadius: '50%', bgcolor: 'blue' }} />
-                                    <Typography
-                                        variant="subtitle2"
-                                        sx={{
-                                            fontWeight: 700,
-                                            fontSize: '0.8rem', // Slightly smaller font to fit 5 columns
-                                            whiteSpace: 'nowrap',
-                                            overflow: 'hidden',
-                                            textOverflow: 'ellipsis'
-                                        }}
-                                    >
-                                        {item[0]}
-                                    </Typography>
-                                    {/* Mock count - replaced redundant {item} string */}
-                                    <Typography variant="caption" color="text.secondary">
-                                        {backlogs?.filter(b => b.status === item[1]).length || 0}
-                                    </Typography>
-                                </Box>
+                                {item[0]}
+                            </Typography>
+                            <Typography variant="caption" color="text.secondary">
+                                {backlogs?.filter(b => b.status === item[1]).length || 0}
+                            </Typography>
+                        </Box>
 
-                                <Divider />
+                        <Divider />
 
-                                {/* Tasks Container */}
-                                <Box sx={{ p: 1, flexGrow: 1, minHeight: 100 }}>
-                                    {backlogs?.filter(b => b.status === item[1]).map(b => (
-                                        <WorkItemCard key={b.id} backlog={b} />
-                                    ))}
-                                </Box>
+                        {/* Tasks Container */}
+                        <Box sx={{
+                            p: 1,
+                            flexGrow: 1, // This pushes the "New Item" button to the bottom
+                            minHeight: 100,
+                            overflowY: 'auto' // Optional: lets the container scroll if cards exceed page height
+                        }}>
+                            {backlogs?.filter(b => b.status === item[1]).map(b => (
+                                <WorkItemCard key={b.id} backlog={b} />
+                            ))}
+                        </Box>
 
-                                {/* Add Item Button */}
-                                <Button
-                                    fullWidth
-                                    startIcon={<Add />}
-                                    sx={{
-                                        justifyContent: 'flex-start',
-                                        color: 'text.secondary',
-                                        textTransform: 'none',
-                                        fontSize: '0.75rem',
-                                        p: 1
-                                    }}
-                                >
-                                    New Item
-                                </Button>
-                            </Box>
-                        </>
-                    )}
+                        {/* Add Item Button */}
+                        <Button
+                            fullWidth
+                            startIcon={<Add />}
+                            sx={{
+                                justifyContent: 'flex-start',
+                                color: 'text.secondary',
+                                textTransform: 'none',
+                                fontSize: '0.75rem',
+                                p: 1,
+                                mt: 'auto' // Ensures it stays pinned to the bottom of the column
+                            }}
+                        >
+                            New Item
+                        </Button>
+                    </Box>
+                ))}
             </Box>
         </Box>
     );
