@@ -1,4 +1,4 @@
-import { useContext, useEffect, useMemo, useState } from 'react';
+import { forwardRef, useContext, useEffect, useMemo, useState } from 'react';
 import {
     Box,
     Typography,
@@ -9,8 +9,14 @@ import {
     Stack,
     Divider,
     LinearProgress,
+    Popover,
+    Avatar,
+    DialogContent,
+    Dialog,
+    Tooltip,
+    Slide,
 } from '@mui/material';
-import { Add, MoreHoriz, ChevronRight, ChevronLeft } from '@mui/icons-material';
+import { Add, MoreHoriz, ChevronRight, ChevronLeft, ChatBubbleOutline, Close } from '@mui/icons-material';
 import { SelectedIndexContext } from '../selectItemContext';
 import { service } from '../../../service';
 import { reduxService, useAppDispatch, useAppSelector } from '../../../redux/hook';
@@ -41,79 +47,121 @@ const getPriorityColor = (priority: number) => {
     }
 };
 
-const WorkItemCard = ({ backlog }: { backlog: Backlog }) => {
+const WorkItemCard = ({ backlog }: {backlog: Backlog}) => {
+    const [open, setOpen] = useState(false);
+
+    const handleOpen = () => setOpen(true);
+    const handleClose = (e) => {
+        if (e) e.stopPropagation();
+        setOpen(false);
+    };
+
     return (
-        <Card
-            variant="outlined"
-            sx={{
-                mb: 1,
-                cursor: 'pointer',
-                borderLeft: '4px solid #0078d4',
-                '&:hover': {
-                    boxShadow: '0 4px 8px rgba(0,0,0,0.12)',
-                    borderColor: '#0078d4',
-                    transform: 'translateY(-2px)',
+        <>
+            <Card
+                variant="outlined"
+                onClick={handleOpen}
+                sx={{
+                    mb: 1.5,
+                    cursor: 'pointer',
+                    borderLeft: '4px solid #0078d4',
+                    '&:hover': {
+                        boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
+                        borderColor: '#0078d4',
+                        transform: 'translateY(-2px)'
+                    },
                     transition: 'all 0.2s ease-in-out'
-                },
-            }}
-        >
-            <CardContent sx={{ p: '12px !important' }}>
-                {/* Noticeable Backlog Name / ID Section */}
-                <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
-                    <Typography
-                        variant="caption"
-                        sx={{
-                            fontSize: '0.75rem',
-                            fontWeight: 800, // Extra bold
-                            color: '#0078d4', // Azure Blue
-                            letterSpacing: '0.05rem',
-                            textTransform: 'uppercase',
-                            bgcolor: '#ebf3fc', // Very light blue background tint
-                            px: 0.8,
-                            py: 0.2,
-                            borderRadius: 0.5,
-                            display: 'inline-block'
-                        }}
-                    >
-                        {backlog.backlog_name}
-                    </Typography>
-                </Box>
-
-                {/* Title: Owner Name */}
-                <Typography variant="body2" sx={{ fontWeight: 600, mb: 0.5, lineHeight: 1.3, color: '#323130' }}>
-                    {backlog.owner_name || "Unassigned"}
-                </Typography>
-
-                {/* Email Subtext */}
-                <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mb: 1.5, fontSize: '0.7rem' }}>
-                    {backlog.email || "no-email@domain.com"}
-                </Typography>
-
-                {/* Metadata Row: Priority & Story Points */}
-                <Stack direction="row" spacing={1} alignItems="center" sx={{ mb: 1.5 }}>
-                    {/* Priority Tag */}
-                    <Box sx={{
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: 0.5,
-                        border: '1px solid #edebe9',
-                        px: 0.5,
-                        borderRadius: 1
-                    }}>
-                        <Box sx={{ width: 6, height: 6, borderRadius: '50%', bgcolor: getPriorityColor(backlog.priority) }} />
-                        <Typography variant="caption" sx={{ fontWeight: 700, fontSize: '0.7rem' }}>P{backlog.priority}</Typography>
-                    </Box>
-
-                    {/* Story Points Tag */}
-                    <Box sx={{ px: 0.8, borderRadius: 1, bgcolor: '#f3f2f1', border: '1px solid #edebe9' }}>
-                        <Typography variant="caption" sx={{ fontWeight: 700, color: '#323130', fontSize: '0.7rem' }}>
-                            {backlog.estimated_story_point || 0} SP
+                }}
+            >
+                <CardContent sx={{ p: '12px !important' }}>
+                    {/* 1. Noticeable Backlog Name */}
+                    <Box sx={{ mb: 1 }}>
+                        <Typography
+                            variant="caption"
+                            sx={{
+                                fontSize: '0.75rem',
+                                fontWeight: 800,
+                                color: '#0078d4',
+                                bgcolor: '#ebf3fc',
+                                px: 0.8, py: 0.2, borderRadius: 0.5,
+                                textTransform: 'uppercase'
+                            }}
+                        >
+                            {backlog.backlog_name}
                         </Typography>
                     </Box>
-                </Stack>
-            </CardContent>
-        </Card>
-    )
+
+                    {/* 2. Owner Name */}
+                    <Typography variant="body2" sx={{ fontWeight: 600, mb: 0.2, color: '#323130' }}>
+                        {backlog.owner_name || "Unassigned"}
+                    </Typography>
+
+                    {/* 3. Email Subtext */}
+                    <Typography variant="caption" sx={{ display: 'block', mb: 1.5, color: 'text.secondary', fontStyle: 'italic' }}>
+                        {backlog.email || "no-email@domain.com"}
+                    </Typography>
+
+                    {/* 4. Priority & Story Points Row */}
+                    <Stack direction="row" spacing={1} alignItems="center" sx={{ mb: 1.5 }}>
+                        <Tooltip title={`Priority ${backlog.priority}`}>
+                            <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, border: '1px solid #edebe9', px: 0.5, borderRadius: 1 }}>
+                                <Box sx={{ width: 6, height: 6, borderRadius: '50%', bgcolor: getPriorityColor(backlog.priority) }} />
+                                <Typography variant="caption" sx={{ fontWeight: 700, fontSize: '0.7rem' }}>P{backlog.priority}</Typography>
+                            </Box>
+                        </Tooltip>
+
+                        <Box sx={{ px: 0.8, borderRadius: 1, bgcolor: '#f3f2f1', border: '1px solid #edebe9' }}>
+                            <Typography variant="caption" sx={{ fontWeight: 700, color: '#323130', fontSize: '0.7rem' }}>
+                                {backlog.estimated_story_point || 0} SP
+                            </Typography>
+                        </Box>
+                    </Stack>
+
+                    <Divider sx={{ mb: 1, opacity: 0.5 }} />
+
+                    {/* 5. Bottom Row (Comments & Avatar) */}
+                    <Stack direction="row" justifyContent="space-between" alignItems="center">
+                        <Stack direction="row" spacing={0.5} alignItems="center">
+                            <ChatBubbleOutline sx={{ fontSize: 14, color: 'text.secondary' }} />
+                            <Typography variant="caption" color="text.secondary">0</Typography>
+                        </Stack>
+
+                        <Avatar
+                            sx={{
+                                width: 24, height: 24, fontSize: 10, bgcolor: '#0078d4', fontWeight: 700,
+                                border: '1px solid #fff', boxShadow: '0 0 0 1px #0078d4'
+                            }}
+                        >
+                            {backlog.owner_name?.split(" ").map(n => n[0]).join("").toUpperCase().slice(0, 2) || "?"}
+                        </Avatar>
+                    </Stack>
+                </CardContent>
+            </Card>
+
+            {/* LARGE CENTERED DIALOG */}
+            <Dialog
+                open={open}
+                onClose={handleClose}
+                maxWidth="md"
+                fullWidth
+                PaperProps={{ sx: { height: '80vh', borderRadius: 2 } }}
+            >
+                <Box sx={{ p: 2, display: 'flex', justifyContent: 'space-between', alignItems: 'center', bgcolor: '#f8f9fa' }}>
+                    <Stack direction="row" spacing={2} alignItems="center">
+                        <Typography variant="h6" sx={{ fontWeight: 800, color: '#0078d4' }}>{backlog.backlog_name}</Typography>
+                        <Divider orientation="vertical" flexItem />
+                        <Typography variant="subtitle1" sx={{ fontWeight: 600 }}>{backlog.owner_name}</Typography>
+                    </Stack>
+                    <IconButton onClick={handleClose}><Close /></IconButton>
+                </Box>
+                <Divider />
+                <DialogContent>
+                    {/* Detailed View Content Goes Here */}
+                    <Typography color="text.secondary">Details for {backlog.backlog_name}...</Typography>
+                </DialogContent>
+            </Dialog>
+        </>
+    );
 };
 
 export default function AzureBoard() {
