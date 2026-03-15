@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import {
     Dialog,
     DialogContent,
@@ -12,25 +12,47 @@ import {
     TextField,
     MenuItem,
     Select,
-    Checkbox,
-    FormControlLabel,
-    Paper
+    Popover,
+    List,
+    ListItem,
+    ListItemButton,
+    ListItemText
 } from '@mui/material';
-import { Close, Save, ExitToApp, Person } from '@mui/icons-material';
+import { Close, Save, ExitToApp, Person, Search } from '@mui/icons-material';
+
+type User = {
+    name: string;
+    id: number;
+    email: string;
+};
+
+const mockUsers: User[] = [
+    { id: 1, name: "Alice Johnson", email: "alice.j@dev.com" },
+    { id: 2, name: "Bob Smith", email: "bob.smith@dev.com" },
+    { id: 3, name: "Charlie Davis", email: "charlie.d@dev.com" },
+];
 
 export const WorkItemDialog = ({ open, handleClose, backlog }: { open: boolean, handleClose: any, backlog: any }) => {
-    // Local state for editability
+    // --- States ---
     const [status, setStatus] = useState(backlog.status);
     const [description, setDescription] = useState(backlog.notes || "");
     const [name, setName] = useState(backlog.backlog_name);
 
-    // Hardcoded Task Data
-    const mockTasks = [
-        { id: 1, name: "Setup project structure", story_point: 1, is_finished: true },
-        { id: 2, name: "Configure OAuth2 provider", story_point: 3, is_finished: false },
-        { id: 3, name: "Create login redirect logic", story_point: 2, is_finished: false },
-    ];
+    // Search Popover States
+    const [searchAnchor, setSearchAnchor] = useState<HTMLButtonElement | null>(null);
+    const [searchQuery, setSearchQuery] = useState("");
 
+    // --- Logic ---
+    const handleOwnerClick = (event: React.MouseEvent<HTMLButtonElement>) => {
+        setSearchAnchor(event.currentTarget);
+    };
+
+    const filteredUsers = useMemo(() => {
+        if (!searchQuery) return [];
+        return mockUsers
+            .filter(u => u.email.toLowerCase().includes(searchQuery.toLowerCase()))
+            .slice(0, 2); // Get first 2 similar records
+    }, [searchQuery]);
     return (
         <Dialog
             open={open}
@@ -77,6 +99,7 @@ export const WorkItemDialog = ({ open, handleClose, backlog }: { open: boolean, 
                             <Grid size={4}>
                                 <Stack spacing={1}>
                                     <Button
+                                        onClick={handleOwnerClick}
                                         variant="outlined"
                                         size="small"
                                         startIcon={<Person fontSize="small" />}
@@ -161,7 +184,7 @@ export const WorkItemDialog = ({ open, handleClose, backlog }: { open: boolean, 
                     </Grid>
 
                     {/* [Tasks list (hardcoded)] size 12 */}
-                    <Grid size={12}>
+                    {/* <Grid size={12}>
                         <Typography variant="subtitle2" sx={{ mb: 1, fontWeight: 700 }}>Tasks</Typography>
                         <Paper variant="outlined" sx={{ borderRadius: 1 }}>
                             {mockTasks.map((task) => (
@@ -190,9 +213,50 @@ export const WorkItemDialog = ({ open, handleClose, backlog }: { open: boolean, 
                                 </Box>
                             ))}
                         </Paper>
-                    </Grid>
+                    </Grid> */}
 
                 </Grid>
+                <Popover
+                    open={Boolean(searchAnchor)}
+                    anchorEl={searchAnchor}
+                    onClose={() => setSearchAnchor(null)}
+                    anchorOrigin={{ vertical: 'bottom', horizontal: 'left' }}
+                    PaperProps={{ sx: { width: 300, p: 1, mt: 1, borderRadius: 2 } }}
+                >
+                    <TextField
+                        autoFocus
+                        fullWidth
+                        size="small"
+                        placeholder="Search by email..."
+                        value={searchQuery}
+                        onChange={(e) => setSearchQuery(e.target.value)}
+                        InputProps={{ startAdornment: <Search fontSize="small" sx={{ mr: 1, color: 'text.secondary' }} /> }}
+                        sx={{ mb: 1 }}
+                    />
+                    <List sx={{ pt: 0 }}>
+                        {filteredUsers.length > 0 ? (
+                            filteredUsers.map(user => (
+                                <ListItem disablePadding key={user.id}>
+                                    <ListItemButton onClick={() => {
+                                        // Logic to update owner would go here
+                                        setSearchAnchor(null);
+                                    }}>
+                                        <ListItemText
+                                            primary={user.name}
+                                            secondary={user.email}
+                                            primaryTypographyProps={{ variant: 'body2', fontWeight: 600 }}
+                                            secondaryTypographyProps={{ variant: 'caption' }}
+                                        />
+                                    </ListItemButton>
+                                </ListItem>
+                            ))
+                        ) : (
+                            <Typography variant="caption" sx={{ p: 2, display: 'block', textAlign: 'center', color: 'text.disabled' }}>
+                                {searchQuery ? "No matches found" : "Type to search users..."}
+                            </Typography>
+                        )}
+                    </List>
+                </Popover>
             </DialogContent>
         </Dialog>
     );
