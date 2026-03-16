@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useContext, useEffect, useState } from 'react';
 import {
     Dialog,
     DialogContent,
@@ -23,13 +23,10 @@ import {
 import { Close, Save, ExitToApp, Person, Search, Add, Task, RestoreFromTrash, DeleteOutline, Restore } from '@mui/icons-material';
 import { service } from '../../../../service';
 import type { Backlog } from './sprintCard';
-import { current } from '@reduxjs/toolkit';
-
-type User = {
-    name: string;
-    id: number;
-    email: string;
-};
+import useDebounce from '../../../../hooks/use-debounce';
+import { useAppSelector } from '../../../../redux/hook';
+import { SelectedIndexContext } from '../../selectItemContext';
+import type { UserSimpleInfo } from '../../../../service/project/projectService';
 
 export type Task = {
     id: number;
@@ -46,6 +43,10 @@ interface LocalTask extends Task {
     state: 'origin' | 'updated' | 'new' | 'deleted'
 }
 
+interface UserUpdateLocation {
+    type: 'backlog' | 'task',
+    index?: number
+}
 
 const getStateStyles = (state: string): { border: string, bgcolor?: string, borderBottom?: string, opacity?: number } => {
     switch (state) {
@@ -56,19 +57,27 @@ const getStateStyles = (state: string): { border: string, bgcolor?: string, bord
     }
 };
 
-const mockUsers: User[] = [
-    { id: 1, name: "Alice Johnson", email: "alice.j@dev.com" },
-    { id: 2, name: "Bob Smith", email: "bob.smith@dev.com" },
-    { id: 3, name: "Charlie Davis", email: "charlie.d@dev.com" },
-];
+const nullUser: UserSimpleInfo = {
+    id: null,
+    name: null,
+    email: null
+}
 
 export const WorkItemDialog = ({ open, handleClose, backlog }: { open: boolean, handleClose: any, backlog: Backlog }) => {
     // --- States ---
     const [status, setStatus] = useState(backlog.status);
     const [description, setDescription] = useState(backlog.notes || "");
     const [name, setName] = useState(backlog.backlog_name);
+    const [backlogOwner, setBacklogOwner] = useState<UserSimpleInfo>({
+        id: backlog.task_owner,
+        name: backlog.owner_name,
+        email: backlog.email
+    })
     const [tasks, setTasks] = useState<LocalTask[]>([])
     const [originalTasks, setOriginalTask] = useState<Task[]>([])
+    const [updateType, setUpdateType] = useState<UserUpdateLocation>({ type: "backlog" })
+    const projectIndex = useContext(SelectedIndexContext)
+    const projectId = useAppSelector(s => s.projectStorage.projects[projectIndex.value].id)
     function evaluateStateChange() {
         setTasks((tasksState) => {
             return tasksState.map((item) => {
@@ -94,16 +103,19 @@ export const WorkItemDialog = ({ open, handleClose, backlog }: { open: boolean, 
     // Search Popover States
     const [searchAnchor, setSearchAnchor] = useState<HTMLButtonElement | null>(null);
     const [searchQuery, setSearchQuery] = useState("");
-    const handleUpdateTasks = (updatedTasks: Task) => {
-
-    }
+    const [filteredUsers, setFilteredUsers] = useState<UserSimpleInfo[]>([])
+    const debounceSearchQuery = useDebounce(searchQuery, 500)
     // --- Logic ---
-    const handleOwnerClick = (event: React.MouseEvent<HTMLButtonElement>) => {
+    const handleOwnerClick = (event: React.MouseEvent<HTMLButtonElement>, type: UserUpdateLocation) => {
+        setUpdateType(type)
         setSearchAnchor(event.currentTarget);
     };
 
     useEffect(() => {
         if (open) {
+            setBacklogOwner({ id: backlog.task_owner, name: backlog.owner_name, email: backlog.email })
+            setStatus(backlog.status)
+            setDescription(backlog.notes)
             service.projectService.getTaskBySprintBacklogId(backlog.id)
                 .then(res => {
                     setOriginalTask(res)
@@ -112,12 +124,10 @@ export const WorkItemDialog = ({ open, handleClose, backlog }: { open: boolean, 
         }
     }, [open])
 
-    const filteredUsers = useMemo(() => {
-        if (!searchQuery) return [];
-        return mockUsers
-            .filter(u => u.email.toLowerCase().includes(searchQuery.toLowerCase()))
-            .slice(0, 2); // Get first 2 similar records
-    }, [searchQuery]);
+    useEffect(() => {
+        service.projectService.getUserByProjectIdAndEmail(projectId, debounceSearchQuery)
+            .then(result => setFilteredUsers([nullUser, ...result]))
+    }, [debounceSearchQuery])
     return (
         <Dialog
             open={open}
@@ -152,7 +162,7 @@ export const WorkItemDialog = ({ open, handleClose, backlog }: { open: boolean, 
                     {/* [sprint_name (hardcode)] size 12 */}
                     <Grid size={12} sx={{ mt: -2 }}>
                         <Typography variant="caption" sx={{ fontWeight: 700, color: 'text.secondary' }}>
-                            SPRINT NAME
+                            {backlog.backlog_name}
                         </Typography>
                     </Grid>
 
@@ -164,7 +174,7 @@ export const WorkItemDialog = ({ open, handleClose, backlog }: { open: boolean, 
                             <Grid size={4}>
                                 <Stack spacing={1}>
                                     <Button
-                                        onClick={handleOwnerClick}
+                                        onClick={(ev) => handleOwnerClick(ev, { type: "backlog" })}
                                         variant="outlined"
                                         size="small"
                                         startIcon={<Person fontSize="small" />}
@@ -175,10 +185,10 @@ export const WorkItemDialog = ({ open, handleClose, backlog }: { open: boolean, 
                                             color: '#323130'
                                         }}
                                     >
-                                        {backlog.owner_name}
+                                        {backlogOwner.name}
                                     </Button>
                                     <Typography variant="caption" sx={{ color: 'text.disabled', pl: 1 }}>
-                                        {backlog.email}
+                                        {backlogOwner.email}
                                     </Typography>
                                 </Stack>
                             </Grid>
@@ -319,8 +329,7 @@ export const WorkItemDialog = ({ open, handleClose, backlog }: { open: boolean, 
                                                         disableUnderline: true,
                                                         sx: {
                                                             fontSize: '0.85rem',
-                                                            textDecoration: task.finished ? 'line-through' : 'none',
-                                                            color: task.finished ? 'text.disabled' : 'text.primary'
+                                                            color: task.finished ? 'text.primary' : 'text.disabled'
                                                         }
                                                     }}
                                                     onChange={(e) => {
@@ -342,7 +351,7 @@ export const WorkItemDialog = ({ open, handleClose, backlog }: { open: boolean, 
                                                     startIcon={<Person fontSize="small" />}
                                                     fullWidth
                                                     disabled={task.state === 'deleted'}
-                                                    onClick={(e) => handleOwnerClick(e)}
+                                                    onClick={(e) => handleOwnerClick(e, { type: "task", index: index })}
                                                     sx={{
                                                         justifyContent: 'flex-start',
                                                         textTransform: 'none',
@@ -364,7 +373,7 @@ export const WorkItemDialog = ({ open, handleClose, backlog }: { open: boolean, 
                                                                 whiteSpace: 'nowrap'
                                                             }}
                                                         >
-                                                            {task.owner_name || "Assign"}
+                                                            {task.owner_name || "Unassigned"}
                                                         </Typography>
                                                         <Typography
                                                             variant="caption"
@@ -472,7 +481,9 @@ export const WorkItemDialog = ({ open, handleClose, backlog }: { open: boolean, 
                 <Popover
                     open={Boolean(searchAnchor)}
                     anchorEl={searchAnchor}
-                    onClose={() => setSearchAnchor(null)}
+                    onClose={() => {
+                        setSearchAnchor(null)
+                    }}
                     anchorOrigin={{ vertical: 'bottom', horizontal: 'left' }}
                     PaperProps={{ sx: { width: 300, p: 1, mt: 1, borderRadius: 2 } }}
                 >
@@ -491,12 +502,28 @@ export const WorkItemDialog = ({ open, handleClose, backlog }: { open: boolean, 
                             filteredUsers.map(user => (
                                 <ListItem disablePadding key={user.id}>
                                     <ListItemButton onClick={() => {
-                                        // Logic to update owner would go here
+                                        if (updateType.type === "backlog") {
+                                            setBacklogOwner(user)
+                                            setSearchAnchor(null)
+                                            return
+                                        }
+                                        if (updateType.index === undefined || updateType.index === null) {
+                                            setSearchAnchor(null)
+                                            return
+                                        }
+                                        const index = updateType.index
+                                        setTasks(tasksState => {
+                                            tasksState[index].user_id = user.id
+                                            tasksState[index].owner_email = user.email
+                                            tasksState[index].owner_name = user.name
+                                            return tasksState
+                                        })
+                                        evaluateStateChange()
                                         setSearchAnchor(null);
                                     }}>
                                         <ListItemText
-                                            primary={user.name}
-                                            secondary={user.email}
+                                            primary={user.name || "Unassigned"}
+                                            secondary={user.email || "Unassigned"}
                                             primaryTypographyProps={{ variant: 'body2', fontWeight: 600 }}
                                             secondaryTypographyProps={{ variant: 'caption' }}
                                         />

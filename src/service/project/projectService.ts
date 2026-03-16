@@ -57,7 +57,7 @@ export function getTaskBySprintBacklogId(sprintBacklogId: number) {
     }).then(res => res.data as Task[]).catch(e => { throw e })
 }
 
-export type UserSimpleInfo = { id: number, name: string, email: string }
+export type UserSimpleInfo = { id: number | null, name: string | null, email: string | null }
 
 export function getUserByProjectIdAndEmail(projectId: number, email: string) {
     return axiosService({
