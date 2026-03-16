@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import {
     Dialog,
     DialogContent,
@@ -16,9 +16,14 @@ import {
     List,
     ListItem,
     ListItemButton,
-    ListItemText
+    ListItemText,
+    Paper,
+    FormControlLabel,
+    Checkbox
 } from '@mui/material';
-import { Close, Save, ExitToApp, Person, Search } from '@mui/icons-material';
+import { Close, Save, ExitToApp, Person, Search, Add } from '@mui/icons-material';
+import { service } from '../../../../service';
+import type { Backlog } from './sprintCard';
 
 type User = {
     name: string;
@@ -26,17 +31,30 @@ type User = {
     email: string;
 };
 
+export type Task = {
+    id: number;
+    user_id: number | null;
+    sprint_back_log_id: number;
+    story_point: number;
+    finished: boolean;
+    name: string;
+    owner_name: string | null,
+    owner_email: string | null
+};
+
+
 const mockUsers: User[] = [
     { id: 1, name: "Alice Johnson", email: "alice.j@dev.com" },
     { id: 2, name: "Bob Smith", email: "bob.smith@dev.com" },
     { id: 3, name: "Charlie Davis", email: "charlie.d@dev.com" },
 ];
 
-export const WorkItemDialog = ({ open, handleClose, backlog }: { open: boolean, handleClose: any, backlog: any }) => {
+export const WorkItemDialog = ({ open, handleClose, backlog }: { open: boolean, handleClose: any, backlog: Backlog }) => {
     // --- States ---
     const [status, setStatus] = useState(backlog.status);
     const [description, setDescription] = useState(backlog.notes || "");
     const [name, setName] = useState(backlog.backlog_name);
+    const [tasks, setTasks] = useState<Task[]>([])
 
     // Search Popover States
     const [searchAnchor, setSearchAnchor] = useState<HTMLButtonElement | null>(null);
@@ -46,6 +64,13 @@ export const WorkItemDialog = ({ open, handleClose, backlog }: { open: boolean, 
     const handleOwnerClick = (event: React.MouseEvent<HTMLButtonElement>) => {
         setSearchAnchor(event.currentTarget);
     };
+
+    useEffect(() => {
+        if (open) {
+            service.projectService.getTaskBySprintBacklogId(backlog.id)
+                .then(res => setTasks(res)).catch(e => console.log(e))
+        }
+    }, [open])
 
     const filteredUsers = useMemo(() => {
         if (!searchQuery) return [];
@@ -183,37 +208,124 @@ export const WorkItemDialog = ({ open, handleClose, backlog }: { open: boolean, 
                         />
                     </Grid>
 
-                    {/* [Tasks list (hardcoded)] size 12 */}
-                    {/* <Grid size={12}>
-                        <Typography variant="subtitle2" sx={{ mb: 1, fontWeight: 700 }}>Tasks</Typography>
+                    <Grid size={12}>
+                        <Typography variant="subtitle2" sx={{ mb: 1, fontWeight: 700 }}>
+                            Tasks
+                        </Typography>
                         <Paper variant="outlined" sx={{ borderRadius: 1 }}>
-                            {mockTasks.map((task) => (
+                            {tasks.map((task: Task, index: number) => (
                                 <Box
                                     key={task.id}
                                     sx={{
-                                        display: 'flex',
-                                        alignItems: 'center',
                                         p: 1,
                                         borderBottom: '1px solid #edebe9',
-                                        '&:last-child': { borderBottom: 0 }
+                                        '&:last-child': { borderBottom: 0 },
+                                        bgcolor: index % 2 === 0 ? 'transparent' : '#faf9f8' // Subtle alternating rows
                                     }}
                                 >
-                                    <FormControlLabel
-                                        control={<Checkbox checked={task.is_finished} size="small" />}
-                                        label={
-                                            <Typography variant="body2" sx={{ textDecoration: task.is_finished ? 'line-through' : 'none' }}>
-                                                {task.name}
-                                            </Typography>
-                                        }
-                                        sx={{ flexGrow: 1 }}
-                                    />
-                                    <Typography variant="caption" sx={{ bgcolor: '#f3f2f1', px: 1, borderRadius: 5, fontWeight: 700 }}>
-                                        {task.story_point} SP
-                                    </Typography>
+                                    <Grid container spacing={1} alignItems="center">
+                                        {/* [finished] size 1 */}
+                                        <Grid size={1}>
+                                            <Checkbox
+                                                checked={task.finished}
+                                                size="small"
+                                                onChange={(e) => {/* Handle toggle logic */ }}
+                                            />
+                                        </Grid>
+
+                                        {/* [task_name] size 5 - Now Editable */}
+                                        <Grid size={5}>
+                                            <TextField
+                                                fullWidth
+                                                size="small"
+                                                variant="standard"
+                                                value={task.name}
+                                                placeholder="Task name"
+                                                InputProps={{
+                                                    disableUnderline: true,
+                                                    sx: {
+                                                        fontSize: '0.85rem',
+                                                        textDecoration: task.finished ? 'line-through' : 'none',
+                                                        color: task.finished ? 'text.disabled' : 'text.primary'
+                                                    }
+                                                }}
+                                                onChange={(e) => {/* Handle task name change logic */ }}
+                                            />
+                                        </Grid>
+
+                                        {/* [[owner_name size 12, owner_email size 12]] size 4 */}
+                                        <Grid size={4}>
+                                            <Grid container>
+                                                <Grid size={12}>
+                                                    <Button
+                                                        variant="outlined"
+                                                        size="small"
+                                                        startIcon={<Person fontSize="small" />}
+                                                        fullWidth
+                                                        onClick={(e) => handleOwnerClick(e)} // Using your search popover logic
+                                                        sx={{
+                                                            justifyContent: 'flex-start',
+                                                            textTransform: 'none',
+                                                            borderColor: '#edebe9',
+                                                            color: '#323130',
+                                                            fontSize: '0.7rem',
+                                                            py: 0.1,
+                                                            minHeight: '28px'
+                                                        }}
+                                                    >
+                                                        {task.owner_name || "Unassigned"}
+                                                    </Button>
+                                                </Grid>
+                                                <Grid size={12}>
+                                                    <Typography variant="caption" sx={{ color: 'text.disabled', pl: 1, fontSize: '0.6rem' }}>
+                                                        {task.owner_email || "no-email"}
+                                                    </Typography>
+                                                </Grid>
+                                            </Grid>
+                                        </Grid>
+
+                                        {/* [story_point] size 2 - Now Editable */}
+                                        <Grid size={2}>
+                                            <TextField
+                                                type="number"
+                                                size="small"
+                                                variant="outlined"
+                                                value={task.story_point}
+                                                placeholder="0"
+                                                InputProps={{
+                                                    sx: {
+                                                        fontSize: '0.75rem',
+                                                        height: '28px',
+                                                        fontWeight: 700,
+                                                        bgcolor: '#f3f2f1',
+                                                        '& fieldset': { border: 'none' }
+                                                    }
+                                                }}
+                                                inputProps={{ style: { textAlign: 'center', padding: '4px' } }}
+                                                onChange={(e) => {/* Handle SP change logic */ }}
+                                            />
+                                        </Grid>
+                                    </Grid>
                                 </Box>
                             ))}
                         </Paper>
-                    </Grid> */}
+                        <Button
+                            fullWidth
+                            startIcon={<Add />}
+                            onClick={() => {/* Add logic to push a new object to the tasks array */ }}
+                            sx={{
+                                mt: 1,
+                                justifyContent: 'flex-start',
+                                textTransform: 'none',
+                                color: '#0078d4',
+                                fontSize: '0.8rem',
+                                fontWeight: 600,
+                                '&:hover': { bgcolor: '#ebf3fc' }
+                            }}
+                        >
+                            Add task
+                        </Button>
+                    </Grid>
 
                 </Grid>
                 <Popover
