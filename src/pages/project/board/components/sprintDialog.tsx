@@ -18,12 +18,12 @@ import {
     ListItemButton,
     ListItemText,
     Paper,
-    FormControlLabel,
     Checkbox
 } from '@mui/material';
-import { Close, Save, ExitToApp, Person, Search, Add } from '@mui/icons-material';
+import { Close, Save, ExitToApp, Person, Search, Add, Task, RestoreFromTrash, DeleteOutline, Restore } from '@mui/icons-material';
 import { service } from '../../../../service';
 import type { Backlog } from './sprintCard';
+import { current } from '@reduxjs/toolkit';
 
 type User = {
     name: string;
@@ -42,6 +42,19 @@ export type Task = {
     owner_email: string | null
 };
 
+interface LocalTask extends Task {
+    state: 'origin' | 'updated' | 'new' | 'deleted'
+}
+
+
+const getStateStyles = (state: string): { border: string, bgcolor?: string, borderBottom?: string, opacity?: number } => {
+    switch (state) {
+        case 'new': return { border: '1px solid #28a745', bgcolor: '#f0fff4' }; // Green
+        case 'updated': return { border: '1px solid #004896', bgcolor: '#fffaf5' }; // Brown
+        case 'deleted': return { border: '1px solid #d73a49', bgcolor: '#ffdce0', opacity: 0.7 }; // Red
+        default: return { border: '1px solid transparent', borderBottom: '1px solid #edebe9' }; // Origin
+    }
+};
 
 const mockUsers: User[] = [
     { id: 1, name: "Alice Johnson", email: "alice.j@dev.com" },
@@ -54,12 +67,36 @@ export const WorkItemDialog = ({ open, handleClose, backlog }: { open: boolean, 
     const [status, setStatus] = useState(backlog.status);
     const [description, setDescription] = useState(backlog.notes || "");
     const [name, setName] = useState(backlog.backlog_name);
-    const [tasks, setTasks] = useState<Task[]>([])
+    const [tasks, setTasks] = useState<LocalTask[]>([])
+    const [originalTasks, setOriginalTask] = useState<Task[]>([])
+    function evaluateStateChange() {
+        setTasks((tasksState) => {
+            return tasksState.map((item) => {
+                if (item.state === 'new' || item.state === 'deleted') {
+                    return item;
+                }
+                const origin = originalTasks.find(o => o.id === item.id);
+                if (!origin) {
+                    throw `Where did you get this key ${item.id}`;
+                }
+                const unchanged = origin.finished === item.finished
+                    && origin.name === item.name
+                    && origin.user_id === item.user_id
+                    && origin.story_point === item.story_point
+                return {
+                    ...item,
+                    state: unchanged ? 'origin' : 'updated'
+                };
+            });
+        });
+    }
 
     // Search Popover States
     const [searchAnchor, setSearchAnchor] = useState<HTMLButtonElement | null>(null);
     const [searchQuery, setSearchQuery] = useState("");
+    const handleUpdateTasks = (updatedTasks: Task) => {
 
+    }
     // --- Logic ---
     const handleOwnerClick = (event: React.MouseEvent<HTMLButtonElement>) => {
         setSearchAnchor(event.currentTarget);
@@ -68,7 +105,10 @@ export const WorkItemDialog = ({ open, handleClose, backlog }: { open: boolean, 
     useEffect(() => {
         if (open) {
             service.projectService.getTaskBySprintBacklogId(backlog.id)
-                .then(res => setTasks(res)).catch(e => console.log(e))
+                .then(res => {
+                    setOriginalTask(res)
+                    setTasks(res.map(task => ({ ...task, state: 'origin' })))
+                }).catch(e => console.log(e))
         }
     }, [open])
 
@@ -209,110 +249,211 @@ export const WorkItemDialog = ({ open, handleClose, backlog }: { open: boolean, 
                     </Grid>
 
                     <Grid size={12}>
-                        <Typography variant="subtitle2" sx={{ mb: 1, fontWeight: 700 }}>
-                            Tasks
-                        </Typography>
-                        <Paper variant="outlined" sx={{ borderRadius: 1 }}>
-                            {tasks.map((task: Task, index: number) => (
-                                <Box
-                                    key={task.id}
+                        <Grid container alignItems="center" sx={{ mb: 1 }}>
+                            <Grid size={10}>
+                                <Typography variant="subtitle2" sx={{ fontWeight: 700 }}>
+                                    Tasks
+                                </Typography>
+                            </Grid>
+
+                            {/* [Undo Button] size 2 aligned right */}
+                            <Grid size={2} sx={{ display: 'flex', justifyContent: 'flex-end' }}>
+                                <Button
+                                    size="small"
+                                    startIcon={<Restore />}
+                                    onClick={() => { setTasks(() => originalTasks.map(item => ({ ...item, state: 'origin' }))) }}
                                     sx={{
-                                        p: 1,
-                                        borderBottom: '1px solid #edebe9',
-                                        '&:last-child': { borderBottom: 0 },
-                                        bgcolor: index % 2 === 0 ? 'transparent' : '#faf9f8' // Subtle alternating rows
+                                        textTransform: 'none',
+                                        fontSize: '0.75rem',
+                                        color: 'text.secondary',
+                                        '&:hover': { color: '#0078d4' }
                                     }}
                                 >
-                                    <Grid container spacing={1} alignItems="center">
-                                        {/* [finished] size 1 */}
-                                        <Grid size={1}>
-                                            <Checkbox
-                                                checked={task.finished}
-                                                size="small"
-                                                onChange={(e) => {/* Handle toggle logic */ }}
-                                            />
-                                        </Grid>
+                                    Undo All
+                                </Button>
+                            </Grid>
+                        </Grid>
+                        <Paper variant="outlined" sx={{ borderRadius: 1 }}>
+                            {tasks.map((task: LocalTask, index: number) => {
+                                const style = getStateStyles(task.state);
+                                return (
+                                    <Box
+                                        key={task.id}
+                                        sx={{
+                                            p: 1,
+                                            transition: 'all 0.2s ease',
+                                            ...style,
+                                            '&:last-child': { borderBottom: task.state === 'origin' ? 0 : style.border }
+                                        }}
+                                    >
+                                        <Grid container spacing={1} alignItems="center">
+                                            {/* [finished] size 1 */}
+                                            <Grid size={1}>
+                                                <Checkbox
+                                                    checked={task.finished}
+                                                    size="small"
+                                                    onChange={() => {
+                                                        const t = tasks.find(item => item.id === task.id)
+                                                        if (!t) {
+                                                            return
+                                                        }
+                                                        setTasks((tasksState) =>
+                                                            tasksState.map(
+                                                                item => item.id !== task.id ? item : { ...task, finished: !t.finished }
+                                                            )
+                                                        )
+                                                        evaluateStateChange();
+                                                    }}
+                                                />
+                                            </Grid>
 
-                                        {/* [task_name] size 5 - Now Editable */}
-                                        <Grid size={5}>
-                                            <TextField
-                                                fullWidth
-                                                size="small"
-                                                variant="standard"
-                                                value={task.name}
-                                                placeholder="Task name"
-                                                InputProps={{
-                                                    disableUnderline: true,
-                                                    sx: {
-                                                        fontSize: '0.85rem',
-                                                        textDecoration: task.finished ? 'line-through' : 'none',
-                                                        color: task.finished ? 'text.disabled' : 'text.primary'
-                                                    }
-                                                }}
-                                                onChange={(e) => {/* Handle task name change logic */ }}
-                                            />
-                                        </Grid>
+                                            {/* [task_name] size 5 - Now Editable */}
+                                            <Grid size={5}>
+                                                <TextField
+                                                    fullWidth
+                                                    size="small"
+                                                    variant="standard"
+                                                    value={task.name}
+                                                    placeholder="Task name"
+                                                    InputProps={{
+                                                        disableUnderline: true,
+                                                        sx: {
+                                                            fontSize: '0.85rem',
+                                                            textDecoration: task.finished ? 'line-through' : 'none',
+                                                            color: task.finished ? 'text.disabled' : 'text.primary'
+                                                        }
+                                                    }}
+                                                    onChange={(e) => {
+                                                        setTasks(
+                                                            (tasksState) => {
+                                                                tasksState[index].name = e.target.value
+                                                                return tasksState
+                                                            })
+                                                        evaluateStateChange()
+                                                    }}
+                                                />
+                                            </Grid>
 
-                                        {/* [[owner_name size 12, owner_email size 12]] size 4 */}
-                                        <Grid size={4}>
-                                            <Grid container>
-                                                <Grid size={12}>
-                                                    <Button
-                                                        variant="outlined"
-                                                        size="small"
-                                                        startIcon={<Person fontSize="small" />}
-                                                        fullWidth
-                                                        onClick={(e) => handleOwnerClick(e)} // Using your search popover logic
-                                                        sx={{
-                                                            justifyContent: 'flex-start',
-                                                            textTransform: 'none',
-                                                            borderColor: '#edebe9',
-                                                            color: '#323130',
-                                                            fontSize: '0.7rem',
-                                                            py: 0.1,
-                                                            minHeight: '28px'
-                                                        }}
-                                                    >
-                                                        {task.owner_name || "Unassigned"}
-                                                    </Button>
-                                                </Grid>
-                                                <Grid size={12}>
-                                                    <Typography variant="caption" sx={{ color: 'text.disabled', pl: 1, fontSize: '0.6rem' }}>
-                                                        {task.owner_email || "no-email"}
-                                                    </Typography>
-                                                </Grid>
+                                            {/* [[owner_name size 12, owner_email size 12]] size 4 */}
+                                            <Grid size={3}>
+                                                <Button
+                                                    variant="outlined"
+                                                    size="small"
+                                                    startIcon={<Person fontSize="small" />}
+                                                    fullWidth
+                                                    disabled={task.state === 'deleted'}
+                                                    onClick={(e) => handleOwnerClick(e)}
+                                                    sx={{
+                                                        justifyContent: 'flex-start',
+                                                        textTransform: 'none',
+                                                        borderColor: '#edebe9',
+                                                        color: '#323130',
+                                                        py: 0.5, // Slightly more padding to breathe with two lines
+                                                        minHeight: '40px', // Increased height to accommodate two lines
+                                                        px: 1,
+                                                        overflow: 'hidden'
+                                                    }}
+                                                >
+                                                    <Stack alignItems="flex-start" sx={{ overflow: 'hidden', width: '100%' }}>
+                                                        <Typography
+                                                            variant="caption"
+                                                            sx={{
+                                                                fontWeight: 700,
+                                                                lineHeight: 1.2,
+                                                                fontSize: '0.7rem',
+                                                                whiteSpace: 'nowrap'
+                                                            }}
+                                                        >
+                                                            {task.owner_name || "Assign"}
+                                                        </Typography>
+                                                        <Typography
+                                                            variant="caption"
+                                                            sx={{
+                                                                color: 'text.disabled',
+                                                                fontSize: '0.6rem',
+                                                                lineHeight: 1.1,
+                                                                whiteSpace: 'nowrap',
+                                                                overflow: 'hidden',
+                                                                textOverflow: 'ellipsis',
+                                                                width: '100%',
+                                                                textAlign: 'left'
+                                                            }}
+                                                        >
+                                                            {task.owner_email || "no-email"}
+                                                        </Typography>
+                                                    </Stack>
+                                                </Button>
+                                            </Grid>
+
+                                            {/* [story_point] size 2 - Now Editable */}
+                                            <Grid size={2}>
+                                                <TextField
+                                                    type="number"
+                                                    size="small"
+                                                    variant="outlined"
+                                                    value={task.story_point}
+                                                    placeholder="0"
+                                                    InputProps={{
+                                                        sx: {
+                                                            fontSize: '0.75rem',
+                                                            height: '28px',
+                                                            fontWeight: 700,
+                                                            bgcolor: '#f3f2f1',
+                                                            '& fieldset': { border: 'none' }
+                                                        }
+                                                    }}
+                                                    inputProps={{ style: { textAlign: 'center', padding: '4px' } }}
+                                                    onChange={(e) => {
+                                                        setTasks((tasksState) => {
+                                                            const point = Number(e.target.value)
+                                                            tasksState[index].story_point = point >= 0 ? point : 0
+                                                            return tasksState
+                                                        })
+                                                        evaluateStateChange()
+                                                    }}
+                                                />
+                                            </Grid>
+                                            <Grid size={1} sx={{ textAlign: 'right' }}>
+                                                <IconButton
+                                                    size="small"
+                                                    color={task.state === 'deleted' ? "primary" : "error"}
+                                                    onClick={() => {
+                                                        if (task.state === 'new') {
+                                                            setTasks((tasksState) => tasksState.filter((item) => item.id !== task.id))
+                                                            return
+                                                        }
+                                                        setTasks(tasksState => {
+                                                            tasksState[index].state = task.state === 'deleted' ? 'updated' : 'deleted'
+                                                            return tasksState
+                                                        })
+                                                        evaluateStateChange()
+                                                    }}
+                                                >
+                                                    {task.state === 'deleted' ? <RestoreFromTrash fontSize="small" /> : <DeleteOutline fontSize="small" />}
+                                                </IconButton>
                                             </Grid>
                                         </Grid>
-
-                                        {/* [story_point] size 2 - Now Editable */}
-                                        <Grid size={2}>
-                                            <TextField
-                                                type="number"
-                                                size="small"
-                                                variant="outlined"
-                                                value={task.story_point}
-                                                placeholder="0"
-                                                InputProps={{
-                                                    sx: {
-                                                        fontSize: '0.75rem',
-                                                        height: '28px',
-                                                        fontWeight: 700,
-                                                        bgcolor: '#f3f2f1',
-                                                        '& fieldset': { border: 'none' }
-                                                    }
-                                                }}
-                                                inputProps={{ style: { textAlign: 'center', padding: '4px' } }}
-                                                onChange={(e) => {/* Handle SP change logic */ }}
-                                            />
-                                        </Grid>
-                                    </Grid>
-                                </Box>
-                            ))}
+                                    </Box>
+                                )
+                            })}
                         </Paper>
                         <Button
                             fullWidth
                             startIcon={<Add />}
-                            onClick={() => {/* Add logic to push a new object to the tasks array */ }}
+                            onClick={() => {
+                                const id = tasks.reduce((prev, current) => current.id < prev.id ? current : prev, tasks[0]).id - 1
+                                setTasks((tasks => [...tasks, {
+                                    id: id,
+                                    user_id: null,
+                                    sprint_back_log_id: backlog.sprint_id,
+                                    story_point: 1,
+                                    finished: false,
+                                    name: "",
+                                    owner_name: null,
+                                    owner_email: null,
+                                    state: 'new'
+                                }]))
+                            }}
                             sx={{
                                 mt: 1,
                                 justifyContent: 'flex-start',
