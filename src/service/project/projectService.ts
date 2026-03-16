@@ -1,5 +1,5 @@
 import type { Backlog } from "../../pages/project/board/components/sprintCard"
-import type { Task } from "../../pages/project/board/components/sprintDialog"
+import type { LocalTask, Task } from "../../pages/project/board/components/sprintDialog"
 import type { Project } from "../../redux/storage/project"
 import type { Sprint } from "../../redux/storage/sprint"
 import { axiosService } from "../axiosService"
@@ -63,5 +63,48 @@ export function getUserByProjectIdAndEmail(projectId: number, email: string) {
     return axiosService({
         url: `/project/member?projectId=${projectId}&email=${email}`,
         method: "GET"
+    }).then(res => res.data as UserSimpleInfo[]).catch(er => { throw er })
+}
+
+type CreateTask = {
+    user_id: number | null,
+    sprint_backlog_id: number,
+    story_point: number,
+    finished: boolean,
+    name: string
+}
+
+interface UpdateTask extends CreateTask {
+    id: number
+}
+
+export function updateTasks(tasks: LocalTask[]) {
+    const create: CreateTask[] = tasks.filter(item => item.state === "new").map(item => ({
+        user_id: item.user_id,
+        sprint_backlog_id: item.sprint_backlog_id,
+        story_point: item.story_point,
+        finished: item.finished,
+        name: item.name
+    }))
+    const update: UpdateTask[] = tasks.filter(item => item.state === "updated").map(item => ({
+        user_id: item.user_id,
+        sprint_backlog_id: item.sprint_backlog_id,
+        story_point: item.story_point,
+        finished: item.finished,
+        name: item.name,
+        id: item.id
+    }))
+    const deleted: { id: number, sprint_backlog_id: number }[] = tasks
+        .filter(item => item.state === "deleted")
+        .map(item => ({ id: item.id, sprint_backlog_id: item.sprint_backlog_id }))
+
+    return axiosService({
+        url: `/sprints/tasks`,
+        method: "PUT",
+        data: {
+            create,
+            update,
+            deleted
+        }
     }).then(res => res.data as UserSimpleInfo[]).catch(er => { throw er })
 }
