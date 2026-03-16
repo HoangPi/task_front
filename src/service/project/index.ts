@@ -1,7 +1,8 @@
-import { getCurrentSprint, getProjects, getSprintBacklogBySprintId } from "./projectService";
+import { getCurrentSprint, getProjects, getSprintBacklogBySprintId, getTaskBySprintBacklogId } from "./projectService";
 
 export const projectService = {
     getProjects: getProjects,
     getCurrentSprint,
-    getSprintBacklogBySprintId
+    getSprintBacklogBySprintId,
+    getTaskBySprintBacklogId
 }

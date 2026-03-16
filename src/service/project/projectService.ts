@@ -1,4 +1,5 @@
-import type { Backlog } from "../../redux/storage/backlog"
+import type { Backlog } from "../../pages/project/board/components/sprintCard"
+import type { Task } from "../../pages/project/board/components/sprintDialog"
 import type { Project } from "../../redux/storage/project"
 import type { Sprint } from "../../redux/storage/sprint"
 import { axiosService } from "../axiosService"
@@ -47,4 +48,11 @@ export function getSprintBacklogBySprintId(sprintId: number) {
         url: `/sprints/backlog?sprintId=${sprintId}`,
         method: "GET"
     }).then(res => res.data as Backlog[]).catch(e => { throw e })
+}
+
+export function getTaskBySprintBacklogId(sprintBacklogId: number) {
+    return axiosService({
+        url: `/sprints/tasks?sprintBacklogId=${sprintBacklogId}`,
+        method: "GET"
+    }).then(res => res.data as Task[]).catch(e => { throw e })
 }
