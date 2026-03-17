@@ -25,10 +25,12 @@ export const GlobalToast = () => {
     useEffect(() => {
         if (notification && notification.data) {
             setOpen(true);
+            setTimeout(handleClose, 3000)
         }
     }, [notification]);
 
     const handleClose = (event?: React.SyntheticEvent | Event, reason?: string) => {
+        event;
         if (reason === 'clickaway') return;
         notification?.dispatcher(null)
         setOpen(false);

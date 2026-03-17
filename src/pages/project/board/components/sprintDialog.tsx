@@ -134,13 +134,13 @@ export const WorkItemDialog = ({ open, handleClose, backlog }: { open: boolean, 
     }, [debounceSearchQuery])
 
     function handleUpdate(): void {
-        service.projectService.updateTasks(tasks)
-            .then(() => service.projectService.updateSprintBacklog({
-                id: backlog.id,
-                status: status,
-                taskOwner: backlogOwner.id,
-                notes: description
-            }))
+        service.projectService.updateSprintBacklog({
+            id: backlog.id,
+            status: status,
+            taskOwner: backlogOwner.id,
+            notes: description
+        })
+            .then(() => service.projectService.updateTasks(tasks))
             .then(() => {
                 service.projectService.getTaskBySprintBacklogId(backlog.id)
                     .then(res => {
@@ -149,10 +149,12 @@ export const WorkItemDialog = ({ open, handleClose, backlog }: { open: boolean, 
                         setTasks(res.map(task => ({ ...task, state: 'origin' })))
                     }).catch(e => console.log(e))
             })
-            .catch((er)=>{toastContext?.dispatcher({
-                message: er,
-                type: ToastType.ERROR
-            })})
+            .catch((er) => {
+                toastContext?.dispatcher({
+                    message: er,
+                    type: ToastType.ERROR
+                })
+            })
     }
 
     return (
