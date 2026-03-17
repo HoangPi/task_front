@@ -147,7 +147,7 @@ export default function SidebarLayout() {
                 <ListItemIcon><History fontSize="small" /></ListItemIcon>
                 <ListItemText primary="Backlogs" />
               </ListItemButton>
-              <ListItemButton sx={{ pl: 4 }}>
+              <ListItemButton onClick={()=>navigate("/dashboard/sprint")} sx={{ pl: 4 }}>
                 <ListItemIcon><Timer fontSize="small" /></ListItemIcon>
                 <ListItemText primary="Sprints" />
               </ListItemButton>

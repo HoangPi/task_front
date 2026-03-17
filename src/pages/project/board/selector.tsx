@@ -1,3 +1,4 @@
+import { SprintPage } from "../sprint/sprintView";
 import AzureBacklogPage from "./backlog";
 import AzureBoard from "./board";
 
@@ -7,6 +8,8 @@ export function BoardSelector({path}: {path: string}){
             return <AzureBoard />
         case ("/dashboard/backlog"):
             return <AzureBacklogPage />
+        case ("/dashboard/sprint"):
+            return <SprintPage />
         default:
             return <AzureBoard />
     }
