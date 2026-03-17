@@ -27,11 +27,13 @@ import useDebounce from '../../../../hooks/use-debounce';
 import { useAppSelector } from '../../../../redux/hook';
 import { SelectedIndexContext } from '../../selectItemContext';
 import type { UserSimpleInfo } from '../../../../service/project/projectService';
+import { ToastContext } from '../../../../components/toast/messageContetx';
+import { ToastType } from '../../../../components/toast/notification';
 
 export type Task = {
     id: number;
     user_id: number | null;
-    sprint_back_log_id: number;
+    sprint_backlog_id: number;
     story_point: number;
     finished: boolean;
     name: string;
@@ -39,7 +41,7 @@ export type Task = {
     owner_email: string | null
 };
 
-interface LocalTask extends Task {
+export interface LocalTask extends Task {
     state: 'origin' | 'updated' | 'new' | 'deleted'
 }
 
@@ -65,6 +67,7 @@ const nullUser: UserSimpleInfo = {
 
 export const WorkItemDialog = ({ open, handleClose, backlog }: { open: boolean, handleClose: any, backlog: Backlog }) => {
     // --- States ---
+    const toastContext = useContext(ToastContext)
     const [status, setStatus] = useState(backlog.status);
     const [description, setDescription] = useState(backlog.notes || "");
     const [name, setName] = useState(backlog.backlog_name);
@@ -118,6 +121,7 @@ export const WorkItemDialog = ({ open, handleClose, backlog }: { open: boolean, 
             setDescription(backlog.notes)
             service.projectService.getTaskBySprintBacklogId(backlog.id)
                 .then(res => {
+                    console.log(res)
                     setOriginalTask(res)
                     setTasks(res.map(task => ({ ...task, state: 'origin' })))
                 }).catch(e => console.log(e))
@@ -128,6 +132,29 @@ export const WorkItemDialog = ({ open, handleClose, backlog }: { open: boolean, 
         service.projectService.getUserByProjectIdAndEmail(projectId, debounceSearchQuery)
             .then(result => setFilteredUsers([nullUser, ...result]))
     }, [debounceSearchQuery])
+
+    function handleUpdate(): void {
+        service.projectService.updateTasks(tasks)
+            .then(() => service.projectService.updateSprintBacklog({
+                id: backlog.id,
+                status: status,
+                taskOwner: backlogOwner.id,
+                notes: description
+            }))
+            .then(() => {
+                service.projectService.getTaskBySprintBacklogId(backlog.id)
+                    .then(res => {
+                        console.log(res)
+                        setOriginalTask(res)
+                        setTasks(res.map(task => ({ ...task, state: 'origin' })))
+                    }).catch(e => console.log(e))
+            })
+            .catch((er)=>{toastContext?.dispatcher({
+                message: er,
+                type: ToastType.ERROR
+            })})
+    }
+
     return (
         <Dialog
             open={open}
@@ -218,6 +245,7 @@ export const WorkItemDialog = ({ open, handleClose, backlog }: { open: boolean, 
                                             fullWidth
                                             variant="contained"
                                             size="small"
+                                            onClick={handleUpdate}
                                             startIcon={<Save />}
                                             sx={{ bgcolor: '#0078d4', textTransform: 'none' }}
                                         >
@@ -231,7 +259,11 @@ export const WorkItemDialog = ({ open, handleClose, backlog }: { open: boolean, 
                                             size="small"
                                             startIcon={<ExitToApp />}
                                             sx={{ textTransform: 'none' }}
-                                            onClick={handleClose}
+                                            onClick={() => {
+                                                handleUpdate()
+                                                handleClose()
+                                            }
+                                            }
                                         >
                                             Save and Exit
                                         </Button>
@@ -350,7 +382,7 @@ export const WorkItemDialog = ({ open, handleClose, backlog }: { open: boolean, 
                                                     size="small"
                                                     startIcon={<Person fontSize="small" />}
                                                     fullWidth
-                                                    disabled={task.state === 'deleted'}
+                                                    // disabled={task.state === 'deleted'}
                                                     onClick={(e) => handleOwnerClick(e, { type: "task", index: index })}
                                                     sx={{
                                                         justifyContent: 'flex-start',
@@ -431,10 +463,9 @@ export const WorkItemDialog = ({ open, handleClose, backlog }: { open: boolean, 
                                                             setTasks((tasksState) => tasksState.filter((item) => item.id !== task.id))
                                                             return
                                                         }
-                                                        setTasks(tasksState => {
-                                                            tasksState[index].state = task.state === 'deleted' ? 'updated' : 'deleted'
-                                                            return tasksState
-                                                        })
+                                                        setTasks(tasksState =>
+                                                            tasksState.map((item, i) => i !== index ? item : { ...item, state: item.state === 'deleted' ? 'updated' : 'deleted' })
+                                                        )
                                                         evaluateStateChange()
                                                     }}
                                                 >
@@ -450,11 +481,14 @@ export const WorkItemDialog = ({ open, handleClose, backlog }: { open: boolean, 
                             fullWidth
                             startIcon={<Add />}
                             onClick={() => {
-                                const id = tasks.reduce((prev, current) => current.id < prev.id ? current : prev, tasks[0]).id - 1
+                                let id = 0
+                                if (tasks.length > 0) {
+                                    id = tasks.reduce((prev, current) => current.id < prev.id ? current : prev, tasks[0]).id - 1
+                                }
                                 setTasks((tasks => [...tasks, {
                                     id: id,
                                     user_id: null,
-                                    sprint_back_log_id: backlog.sprint_id,
+                                    sprint_backlog_id: backlog.id,
                                     story_point: 1,
                                     finished: false,
                                     name: "",

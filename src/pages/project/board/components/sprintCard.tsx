@@ -27,12 +27,13 @@ const getPriorityColor = (priority: number) => {
     }
 };
 
-export const WorkItemCard = ({ backlog }: {backlog: Backlog}) => {
+export const WorkItemCard = ({ backlog, reloadBacklogs }: { backlog: Backlog, reloadBacklogs: (currentSprintId: number) => void }) => {
     const [open, setOpen] = useState(false);
 
     const handleOpen = () => setOpen(true);
     const handleClose = (e: any) => {
         if (e) e.stopPropagation();
+        reloadBacklogs(backlog.sprint_id)
         setOpen(false);
     };
 
@@ -119,7 +120,7 @@ export const WorkItemCard = ({ backlog }: {backlog: Backlog}) => {
             </Card>
 
             {/* LARGE CENTERED DIALOG */}
-            
+
             <WorkItemDialog open={open} handleClose={handleClose} backlog={backlog} />
         </>
     );

@@ -71,14 +71,18 @@ export default function AzureBoard() {
             })
     }, [projectIndex.value])
 
+    const getBacklogs = (currentSprintId: number) => {
+        projectService.getSprintBacklogBySprintId(currentSprintId)
+            .then(result => setBacklogs(result))
+            .catch(() => setBacklogs([]))
+    }
+
     useEffect(() => {
         if (!currentSprint) {
             setBacklogs([])
             return
         }
-        projectService.getSprintBacklogBySprintId(currentSprint.id)
-            .then(result => setBacklogs(result))
-            .catch(() => setBacklogs([]))
+        getBacklogs(currentSprint.id)
     }, [currentSprint?.id])
     return (
         <Box sx={{ p: 3, display: 'flex', flexDirection: 'column', height: '100%' }}>
@@ -195,7 +199,7 @@ export default function AzureBoard() {
                             overflowY: 'auto' // Optional: lets the container scroll if cards exceed page height
                         }}>
                             {backlogs?.filter(b => b.status === item[1]).map(b => (
-                                <WorkItemCard key={b.id} backlog={b} />
+                                <WorkItemCard key={b.id} backlog={b} reloadBacklogs={getBacklogs}/>
                             ))}
                         </Box>
 

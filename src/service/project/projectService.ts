@@ -106,5 +106,20 @@ export function updateTasks(tasks: LocalTask[]) {
             update,
             deleted
         }
-    }).then(res => res.data as UserSimpleInfo[]).catch(er => { throw er })
+    }).then(res => res.data as UserSimpleInfo[]).catch(er => { throw er.response.data.message.split("\n")[0] })
+}
+
+export function updateSprintBacklog(sprintBacklog: {
+    id: number,
+    status: 'on_going' | 'created' | 'in_review' | 'completed' | 'failed' | string,
+    taskOwner: number | null,
+    notes: string
+}) {
+    return axiosService({
+        url: `/sprints/backlog`,
+        method: "PUT",
+        data: {
+            ...sprintBacklog
+        }
+    }).then(res => res.data as UserSimpleInfo[]).catch(er => { throw er.response.data.message.split("\n")[0] })
 }
