@@ -15,6 +15,14 @@ export function getProjects(): Promise<Project[]> {
         .catch(e => { throw e })
 }
 
+export function getSprintsByRange(projectId: number, start: string, end: string): Promise<Sprint[]> {
+    const url = `sprints?projectId=${projectId}&start=${start}&end=${end}`
+    return axiosService({
+        url,
+        method: "GET"
+    }).then(res => res.data as Sprint[]).catch(e => { throw e.response.data.message.split("\n")[0] })
+}
+
 export function getCurrentSprint(projectId: number, date?: string, before?: boolean): Promise<Sprint[]> {
     let startDate = new Date();
     let endDate = new Date();
