@@ -7,7 +7,7 @@ import SignInPage from "./pages/signin"
 import { useEffect, useState } from "react"
 import { VerifyUserSession } from "./service/user/userService"
 import SidebarLayout from "./pages/project/board"
-import { GlobalToast, type ToastState } from "./components/toast/notification"
+import { GlobalToast, ToastType, type ToastState } from "./components/toast/notification"
 import { ToastContext } from "./components/toast/messageContetx"
 
 function App() {
@@ -15,14 +15,18 @@ function App() {
   const dispatch = useAppDispatch()
   const user = useAppSelector(state => state.user)
   useEffect(() => {
+    if (!user.userId) {
+      localStorage.removeItem("access")
+      return
+    }
     VerifyUserSession()
       .then(res => {
         dispatch(setUserInfo(res))
       })
       .catch((e) => {
-        console.log(e);
         localStorage.removeItem("access")
         dispatch(removeUserInfomation())
+        setToastState({ message: String(e), type: ToastType.ERROR })
       })
   }, [user])
 
