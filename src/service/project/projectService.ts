@@ -152,7 +152,7 @@ export function getProductBacklogs(projectId: number, offset: number,
     return axiosService({
         url,
         method: "GET"
-    }).then(res => res.data as ProductBacklog[]).catch(e => {throw e.response.data.message.split("\n")[0] })
+    }).then(res => res.data as ProductBacklog[]).catch(e => { throw e.response.data.message.split("\n")[0] })
 }
 
 export function createSprintBacklog(product_backlog_id: number, sprint_id: number) {
@@ -165,5 +165,36 @@ export function createSprintBacklog(product_backlog_id: number, sprint_id: numbe
             sprint_id,
             note: ""
         }
-    }).then((res)=>res).catch(e => {throw e.response.data.message.split("\n")[0] })
+    }).then((res) => res).catch(e => { throw e.response.data.message.split("\n")[0] })
+}
+
+export function createProductBacklog(backlog: ProductBacklog) {
+
+    return axiosService({
+        url: 'project/backlog',
+        method: "POST",
+        data: {
+            "project_id": backlog.project_id,
+            "name": backlog.name,
+            "acceptance_criteria": backlog.acceptance_criteria,
+            "priority": backlog.priority,
+            "story_point": backlog.story_point
+        }
+    }).then((res) => res).catch(e => { throw e.response.data.message.split("\n")[0] })
+}
+
+export function updateProductBacklog(backlog: ProductBacklog) {
+
+    return axiosService({
+        url: 'backlog',
+        method: "PUT",
+        data: {
+            "id": backlog.id,
+            "project_id": backlog.project_id,
+            "name": backlog.name,
+            "acceptance_criteria": backlog.acceptance_criteria,
+            "priority": backlog.priority,
+            "story_point": backlog.story_point
+        }
+    }).then((res) => res).catch(e => { throw e.response.data.message.split("\n")[0] })
 }
