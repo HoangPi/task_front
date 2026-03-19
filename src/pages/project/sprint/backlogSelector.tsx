@@ -44,7 +44,7 @@ export const ProductBacklogList = ({ sprint_id, createSprintBacklogHandler }: { 
     }
     useEffect(() => {
         fetchBacklogs();
-    }, [projectIndex, projects, nameFilterDebounce, offset, ascStoryPoint, ascPriority])
+    }, [projectIndex.value, nameFilterDebounce, offset, ascStoryPoint, ascPriority])
     return (
         <Box
             sx={{
