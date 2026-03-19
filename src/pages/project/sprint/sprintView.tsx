@@ -537,7 +537,7 @@ export const ProductBacklogList = ({ sprint_id, createSprintBacklogHandler }: { 
                 spacing={1}
             >
                 <Typography variant="caption" sx={{ color: 'text.secondary', mr: 2 }}>
-                    Showing 1-4 of 12 items
+                    {/* Showing 1-4 of 12 items */}
                 </Typography>
 
                 <Button
