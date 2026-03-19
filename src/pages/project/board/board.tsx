@@ -15,6 +15,8 @@ import { reduxService, useAppDispatch, useAppSelector } from '../../../redux/hoo
 import { clearSprint, getNeighborSprint, hasNext, hasPrev, type Sprint } from '../../../redux/storage/sprint';
 import { projectService } from '../../../service/project';
 import { type Backlog, WorkItemCard } from './components/sprintCard';
+import { ToastContext } from '../../../components/toast/messageContetx';
+import { ToastType } from '../../../components/toast/notification';
 
 
 export default function AzureBoard() {
@@ -26,13 +28,14 @@ export default function AzureBoard() {
     const nextSprint = useAppSelector((state) => getNeighborSprint(state, currentSprint?.id ?? 0, false))
     const prev = useAppSelector(hasPrev)
     const next = useAppSelector(hasNext)
+    const toastContext = useContext(ToastContext)
 
     const projectIndex = useContext(SelectedIndexContext)
     const dispatch = useAppDispatch()
 
     const handleFetchSprints = (date: string, before: boolean) => {
         let l_date = date;
-        if (date === ""){
+        if (date === "") {
             const currentDate = new Date()
             l_date = `${currentDate.getFullYear()}-${currentDate.getMonth() + 1}-${currentDate.getDate()}`
         }
@@ -56,7 +59,7 @@ export default function AzureBoard() {
                         setCurrentSprint(result[0])
                     }
                 }
-            })
+            }).catch(e => toastContext?.dispatcher({ message: String(e), type: ToastType.ERROR }))
     }
 
     const diff = useMemo<number>(() => {
@@ -70,11 +73,10 @@ export default function AzureBoard() {
         dispatch(clearSprint());
         service.projectService.getCurrentSprint(projects[projectIndex.value].id)
             .then(res => {
-                // if (res.length) {
-                    setCurrentSprint(res[0]);
-                    dispatch(reduxService.sprintservice.pushBack({ data: res, hasMoreToFetch: true }))
-                // }
+                setCurrentSprint(res[0]);
+                dispatch(reduxService.sprintservice.pushBack({ data: res, hasMoreToFetch: true }))
             })
+            .catch(e => toastContext?.dispatcher({ message: String(e), type: ToastType.ERROR }))
     }, [projectIndex.value])
 
     const getBacklogs = (currentSprintId: number) => {

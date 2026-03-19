@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useContext, useEffect, useState } from 'react';
 import {
   Box,
   Drawer,
@@ -30,11 +30,13 @@ import { addProjectBulk } from '../../../redux/storage/project';
 import { BoardSelector } from './selector';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { clearSprint } from '../../../redux/storage/sprint';
+import { ToastContext } from '../../../components/toast/messageContetx';
+import { ToastType } from '../../../components/toast/notification';
 
 const drawerWidth = 260;
 
 export default function SidebarLayout() {
-  const [selectedItem, setSelectedItem] = useState(-1)
+  const [selectedItem, setSelectedItem] = useState(0)
   const [firstRender, setFirstRender] = useState(true);
   const projects = useAppSelector((s) => s.projectStorage.projects)
   const dispatch = useAppDispatch()
@@ -42,6 +44,8 @@ export default function SidebarLayout() {
   const [openBoards, setOpenBoards] = useState(true);
   const location = useLocation();
   const navigate = useNavigate()
+  const toastContext = useContext(ToastContext)
+
 
   const handleOverviewClick = () => setOpenOverview(!openOverview);
   const handleBoardsClick = () => setOpenBoards(!openBoards);
@@ -56,7 +60,7 @@ export default function SidebarLayout() {
         }
         throw "EMPTY"
       })
-      .catch(e => console.log(e))
+      .catch(e => toastContext?.dispatcher({ message: String(e), type: ToastType.ERROR }))
       .finally(() => {
         // This ensures the white screen disappears whether the call succeeded or failed
         setFirstRender(false);
@@ -167,7 +171,7 @@ export default function SidebarLayout() {
           component="main"
           sx={{ flexGrow: 1, bgcolor: 'background.default', p: 3, minHeight: '100vh' }}
         >
-          <Typography variant="h4">{projects.length ? projects[selectedItem].name : "You do not belong"}</Typography>
+          <Typography variant="h4">{projects && projects.length > 0 ? projects[selectedItem].name : "You do not belong"}</Typography>
           <Typography paragraph>
             {projects.length ? projects[selectedItem].description : ""}
           </Typography>

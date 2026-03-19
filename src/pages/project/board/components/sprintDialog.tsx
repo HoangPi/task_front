@@ -124,7 +124,7 @@ export const WorkItemDialog = ({ open, handleClose, backlog }: { open: boolean, 
                     console.log(res)
                     setOriginalTask(res)
                     setTasks(res.map(task => ({ ...task, state: 'origin' })))
-                }).catch(e => console.log(e))
+                }).catch(e => toastContext?.dispatcher({ message: String(e), type: ToastType.ERROR }))
         }
     }, [open])
 
@@ -134,6 +134,7 @@ export const WorkItemDialog = ({ open, handleClose, backlog }: { open: boolean, 
         }
         service.projectService.getUserByProjectIdAndEmail(projectId, debounceSearchQuery)
             .then(result => setFilteredUsers([nullUser, ...result]))
+            .catch(e => toastContext?.dispatcher({ message: String(e), type: ToastType.ERROR }))
     }, [debounceSearchQuery])
 
     function handleUpdate(): Promise<void> {
@@ -150,7 +151,7 @@ export const WorkItemDialog = ({ open, handleClose, backlog }: { open: boolean, 
                         console.log(res)
                         setOriginalTask(res)
                         setTasks(res.map(task => ({ ...task, state: 'origin' })))
-                    }).catch(e => console.log(e))
+                    }).catch(e => toastContext?.dispatcher({ message: String(e), type: ToastType.ERROR }))
             })
             .catch((er) => {
                 toastContext?.dispatcher({
