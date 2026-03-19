@@ -93,7 +93,7 @@ export const WorkItemCard = ({ backlog, reloadBacklogs }: { backlog: Backlog, re
 
                         <Box sx={{ px: 0.8, borderRadius: 1, bgcolor: '#f3f2f1', border: '1px solid #edebe9' }}>
                             <Typography variant="caption" sx={{ fontWeight: 700, color: '#323130', fontSize: '0.7rem' }}>
-                                {backlog.estimated_story_point || 0} SP
+                                {backlog.actual_story_point || 0}/{backlog.estimated_story_point || 0} SP
                             </Typography>
                         </Box>
                     </Stack>
