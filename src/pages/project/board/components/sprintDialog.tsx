@@ -129,12 +129,15 @@ export const WorkItemDialog = ({ open, handleClose, backlog }: { open: boolean, 
     }, [open])
 
     useEffect(() => {
+        if (!debounceSearchQuery) {
+            return
+        }
         service.projectService.getUserByProjectIdAndEmail(projectId, debounceSearchQuery)
             .then(result => setFilteredUsers([nullUser, ...result]))
     }, [debounceSearchQuery])
 
-    function handleUpdate(): void {
-        service.projectService.updateSprintBacklog({
+    function handleUpdate(): Promise<void> {
+        return service.projectService.updateSprintBacklog({
             id: backlog.id,
             status: status,
             taskOwner: backlogOwner.id,
@@ -262,8 +265,7 @@ export const WorkItemDialog = ({ open, handleClose, backlog }: { open: boolean, 
                                             startIcon={<ExitToApp />}
                                             sx={{ textTransform: 'none' }}
                                             onClick={() => {
-                                                handleUpdate()
-                                                handleClose()
+                                                handleUpdate().then(() => handleClose())
                                             }
                                             }
                                         >

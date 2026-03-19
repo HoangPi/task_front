@@ -131,3 +131,39 @@ export function updateSprintBacklog(sprintBacklog: {
         }
     }).then(res => res.data as UserSimpleInfo[]).catch(er => { throw er.response.data.message.split("\n")[0] })
 }
+
+export type ProductBacklog = {
+    id: number;
+    project_id: number;
+    name: string;
+    acceptance_criteria: string;
+    priority: number;
+    status: "created" | "on_going" | "finished" | string;
+    story_point: number;
+};
+
+export function getProductBacklogs(projectId: number, offset: number,
+    nameFilter: string | null,
+    includeFinished: boolean | null,
+    ascStoryPoint: boolean | null,
+    ascPriority: boolean | null) {
+
+    const url = `/project/backlog/query?projectId=${projectId}&offset=${offset}${nameFilter ? `&name=${(nameFilter)}` : "&name="}${includeFinished ? `&includeFinished=${includeFinished}` : ""}${ascStoryPoint ? `&storyPoint=${ascStoryPoint}` : ""}${ascPriority ? `&priority=${ascPriority}` : ""}`
+    return axiosService({
+        url,
+        method: "GET"
+    }).then(res => res.data as ProductBacklog[]).catch(e => {throw e.response.data.message.split("\n")[0] })
+}
+
+export function createSprintBacklog(product_backlog_id: number, sprint_id: number) {
+
+    return axiosService({
+        url: 'sprints/backlog',
+        method: "POST",
+        data: {
+            product_backlog_id,
+            sprint_id,
+            note: ""
+        }
+    }).then((res)=>res).catch(e => {throw e.response.data.message.split("\n")[0] })
+}
