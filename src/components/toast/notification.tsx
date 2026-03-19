@@ -1,6 +1,9 @@
 import React, { useState, useEffect, useContext } from 'react';
 import { Snackbar, Alert, type AlertColor } from '@mui/material';
 import { ToastContext } from './messageContetx';
+import { useNavigate } from 'react-router-dom';
+import { useAppDispatch } from '../../redux/hook';
+import { removeUserInfomation } from '../../redux/storage/user';
 
 // Enum for the type (MUI Alert accepts 'success' | 'info' | 'warning' | 'error')
 export enum ToastType {
@@ -18,7 +21,8 @@ export interface ToastState {
 export const GlobalToast = () => {
     // Initial state as requested
     const notification = useContext(ToastContext)
-
+    const navigate = useNavigate()
+    const dispatch = useAppDispatch()
     const [open, setOpen] = useState(false);
 
     // Trigger toast when message changes
@@ -26,6 +30,10 @@ export const GlobalToast = () => {
         if (notification && notification.data) {
             setOpen(true);
             setTimeout(handleClose, 3000)
+            if (notification.data.message === "Token has expired") {
+                dispatch(removeUserInfomation())
+                navigate('/signin')
+            }
         }
     }, [notification]);
 
