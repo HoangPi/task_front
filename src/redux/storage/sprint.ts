@@ -53,7 +53,11 @@ export const sprintSlice = createSlice({
                     }
                 });
         },
-        clearSprint: (state) => { state.sprints = [] }
+        clearSprint: (state) => { 
+            state.sprints = [] 
+            state.hasNextItem = true
+            state.hasPreviousItem = true
+        }
     },
     extraReducers: (builder) => {
         builder.addCase(userSlice.actions.removeUserInfomation, (state) => {

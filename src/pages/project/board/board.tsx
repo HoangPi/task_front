@@ -12,7 +12,7 @@ import { Add, MoreHoriz, ChevronRight, ChevronLeft } from '@mui/icons-material';
 import { SelectedIndexContext } from '../selectItemContext';
 import { service } from '../../../service';
 import { reduxService, useAppDispatch, useAppSelector } from '../../../redux/hook';
-import { getNeighborSprint, hasNext, hasPrev, type Sprint } from '../../../redux/storage/sprint';
+import { clearSprint, getNeighborSprint, hasNext, hasPrev, type Sprint } from '../../../redux/storage/sprint';
 import { projectService } from '../../../service/project';
 import { type Backlog, WorkItemCard } from './components/sprintCard';
 
@@ -30,7 +30,12 @@ export default function AzureBoard() {
     const projectIndex = useContext(SelectedIndexContext)
     const dispatch = useAppDispatch()
 
-    const handleFetchSprints = (projectId: number, date: string, before: boolean) => {
+    const handleFetchSprints = (date: string, before: boolean) => {
+        let l_date = date;
+        if (date === ""){
+            const currentDate = new Date()
+            l_date = `${currentDate.getFullYear()}-${currentDate.getMonth() + 1}-${currentDate.getDate()}`
+        }
         if (before && previousSprint) {
             setCurrentSprint(previousSprint)
             return
@@ -38,7 +43,7 @@ export default function AzureBoard() {
             setCurrentSprint(nextSprint)
             return
         }
-        service.projectService.getCurrentSprint(projectId, date, before)
+        service.projectService.getCurrentSprint(projects[projectIndex.value].id, l_date, before)
             .then(result => {
                 if (result.length) {
                     const hasMoreToFetch = result.length >= 20
@@ -62,12 +67,13 @@ export default function AzureBoard() {
     }, [currentSprint])
 
     useEffect(() => {
+        dispatch(clearSprint());
         service.projectService.getCurrentSprint(projects[projectIndex.value].id)
             .then(res => {
-                if (res.length) {
+                // if (res.length) {
                     setCurrentSprint(res[0]);
                     dispatch(reduxService.sprintservice.pushBack({ data: res, hasMoreToFetch: true }))
-                }
+                // }
             })
     }, [projectIndex.value])
 
@@ -101,7 +107,7 @@ export default function AzureBoard() {
                         size="small"
                         startIcon={<ChevronLeft />}
                         disabled={!prev && previousSprint === null}
-                        onClick={() => { handleFetchSprints(currentSprint?.project_id ?? 0, currentSprint?.start_date ?? "", true) }}
+                        onClick={() => { handleFetchSprints(currentSprint?.start_date ?? "", true) }}
                         sx={{
                             textTransform: 'none',
                             color: 'text.secondary',
@@ -118,7 +124,7 @@ export default function AzureBoard() {
                         size="small"
                         endIcon={<ChevronRight />}
                         disabled={!next && nextSprint === null}
-                        onClick={() => { handleFetchSprints(currentSprint?.project_id ?? 0, currentSprint?.end_date ?? "", false) }}
+                        onClick={() => { handleFetchSprints(currentSprint?.end_date ?? "", false) }}
                         sx={{
                             textTransform: 'none',
                             color: 'text.secondary',
@@ -199,7 +205,7 @@ export default function AzureBoard() {
                             overflowY: 'auto' // Optional: lets the container scroll if cards exceed page height
                         }}>
                             {backlogs?.filter(b => b.status === item[1]).map(b => (
-                                <WorkItemCard key={b.id} backlog={b} reloadBacklogs={getBacklogs}/>
+                                <WorkItemCard key={b.id} backlog={b} reloadBacklogs={getBacklogs} />
                             ))}
                         </Box>
 
