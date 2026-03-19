@@ -12,7 +12,7 @@ export function getProjects(): Promise<Project[]> {
         .then(res => {
             return res.data as Project[]
         })
-        .catch(e => { throw e })
+        .catch(e => { throw e.response.data.message.split("\n")[0] })
 }
 
 export function getSprintsByRange(projectId: number, start: string, end: string): Promise<Sprint[]> {
@@ -48,21 +48,21 @@ export function getCurrentSprint(projectId: number, date?: string, before?: bool
         .then(res => {
             return res.data as Sprint[]
         })
-        .catch(e => { throw e })
+        .catch(e => { throw e.response.data.message.split("\n")[0] })
 }
 
 export function getSprintBacklogBySprintId(sprintId: number) {
     return axiosService({
         url: `/sprints/backlog?sprintId=${sprintId}`,
         method: "GET"
-    }).then(res => res.data as Backlog[]).catch(e => { throw e })
+    }).then(res => res.data as Backlog[]).catch(e => { throw e }).catch(e => { throw e.response.data.message.split("\n")[0] })
 }
 
 export function getTaskBySprintBacklogId(sprintBacklogId: number) {
     return axiosService({
         url: `/sprints/tasks?sprintBacklogId=${sprintBacklogId}`,
         method: "GET"
-    }).then(res => res.data as Task[]).catch(e => { throw e })
+    }).then(res => res.data as Task[]).catch(e => { throw e }).catch(e => { throw e.response.data.message.split("\n")[0] })
 }
 
 export type UserSimpleInfo = { id: number | null, name: string | null, email: string | null }
@@ -71,7 +71,7 @@ export function getUserByProjectIdAndEmail(projectId: number, email: string) {
     return axiosService({
         url: `/project/member?projectId=${projectId}&email=${email}`,
         method: "GET"
-    }).then(res => res.data as UserSimpleInfo[]).catch(er => { throw er })
+    }).then(res => res.data as UserSimpleInfo[]).catch(er => { throw er }).catch(e => { throw e.response.data.message.split("\n")[0] })
 }
 
 type CreateTask = {
