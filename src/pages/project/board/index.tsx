@@ -48,7 +48,7 @@ export default function SidebarLayout() {
   useEffect(() => {
     service.projectService.getProjects()
       .then(result => {
-        if(result.length){
+        if (result.length) {
           setSelectedItem(0)
           dispatch(addProjectBulk(result))
           return;
@@ -62,17 +62,21 @@ export default function SidebarLayout() {
       });
   }, [])
 
+  useEffect(() => {
+
+  }, [selectedItem])
+
   if (firstRender) {
     return (
-      <Box 
-        sx={{ 
-          position: 'fixed', 
-          top: 0, 
-          left: 0, 
-          width: '100vw', 
-          height: '100vh', 
-          bgcolor: 'white', 
-        }} 
+      <Box
+        sx={{
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          width: '100vw',
+          height: '100vh',
+          bgcolor: 'white',
+        }}
       />
     );
   }
@@ -103,7 +107,7 @@ export default function SidebarLayout() {
               label="Project"
               onChange={(e) => setSelectedItem(e.target.value)}
             >
-              {projects.map((item, index)=><MenuItem value={index}>{item.name}</MenuItem>)}
+              {projects.map((item, index) => <MenuItem value={index}>{item.name}</MenuItem>)}
             </Select>
           </FormControl>
         </Box>
@@ -139,15 +143,15 @@ export default function SidebarLayout() {
           </ListItemButton>
           <Collapse in={openBoards} timeout="auto" unmountOnExit>
             <List component="div" disablePadding>
-              <ListItemButton onClick={()=>navigate("/dashboard/board")} sx={{ pl: 4 }}>
+              <ListItemButton onClick={() => navigate("/dashboard/board")} sx={{ pl: 4 }}>
                 <ListItemIcon><ViewKanban fontSize="small" /></ListItemIcon>
                 <ListItemText primary="Boards" />
               </ListItemButton>
-              <ListItemButton onClick={()=>navigate("/dashboard/backlog")} sx={{ pl: 4 }}>
+              <ListItemButton onClick={() => navigate("/dashboard/backlog")} sx={{ pl: 4 }}>
                 <ListItemIcon><History fontSize="small" /></ListItemIcon>
                 <ListItemText primary="Backlogs" />
               </ListItemButton>
-              <ListItemButton onClick={()=>navigate("/dashboard/sprint")} sx={{ pl: 4 }}>
+              <ListItemButton onClick={() => navigate("/dashboard/sprint")} sx={{ pl: 4 }}>
                 <ListItemIcon><Timer fontSize="small" /></ListItemIcon>
                 <ListItemText primary="Sprints" />
               </ListItemButton>
@@ -166,7 +170,7 @@ export default function SidebarLayout() {
           <Typography paragraph>
             {projects.length ? projects[selectedItem].description : ""}
           </Typography>
-          <BoardSelector path={location.pathname}/>
+          <BoardSelector path={location.pathname} />
         </Box>
       </SelectedIndexContext>
     </Box>

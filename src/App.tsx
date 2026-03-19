@@ -37,10 +37,6 @@ function App() {
           <Route path="/dashboard/*" element={<SidebarLayout />}></Route>
         </> : <></>}
       </Routes>
-      <button onClick={() => {
-        dispatch(removeUserInfomation())
-        localStorage.removeItem("access")
-      }}>Remove</button>
     </ToastContext>
   </>
   )
