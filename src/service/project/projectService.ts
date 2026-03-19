@@ -148,7 +148,7 @@ export function getProductBacklogs(projectId: number, offset: number,
     ascStoryPoint: boolean | null,
     ascPriority: boolean | null) {
 
-    const url = `/project/backlog/query?projectId=${projectId}&offset=${offset}${nameFilter ? `&name=${(nameFilter)}` : "&name="}${includeFinished ? `&includeFinished=${includeFinished}` : ""}${ascStoryPoint ? `&storyPoint=${ascStoryPoint}` : ""}${ascPriority ? `&priority=${ascPriority}` : ""}`
+    const url = `/project/backlog/query?projectId=${projectId}&offset=${offset}${nameFilter !== null ? `&name=${(nameFilter)}` : "&name="}${includeFinished !== null ? `&finished=${includeFinished}` : ""}${ascStoryPoint !== null ? `&storyPoint=${ascStoryPoint}` : ""}${ascPriority !== null ? `&priority=${ascPriority}` : ""}`
     return axiosService({
         url,
         method: "GET"
