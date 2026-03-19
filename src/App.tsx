@@ -9,6 +9,8 @@ import { VerifyUserSession } from "./service/user/userService"
 import SidebarLayout from "./pages/project/board"
 import { GlobalToast, ToastType, type ToastState } from "./components/toast/notification"
 import { ToastContext } from "./components/toast/messageContetx"
+import { service } from "./service"
+import { addProjectBulk } from "./redux/storage/project"
 
 function App() {
   const [toastState, setToastState] = useState<ToastState | null>(null)
@@ -21,8 +23,10 @@ function App() {
     }
     VerifyUserSession()
       .then(res => {
-        dispatch(setUserInfo(res))
+        return dispatch(setUserInfo(res))
       })
+      .then(() => service.projectService.getProjects())
+      .then(res => dispatch(addProjectBulk(res)))
       .catch((e) => {
         localStorage.removeItem("access")
         dispatch(removeUserInfomation())
