@@ -29,6 +29,7 @@ import { useAppDispatch, useAppSelector } from '../../../redux/hook';
 import { addProjectBulk } from '../../../redux/storage/project';
 import { BoardSelector } from './selector';
 import { useLocation, useNavigate } from 'react-router-dom';
+import { clearSprint } from '../../../redux/storage/sprint';
 
 const drawerWidth = 260;
 
@@ -63,7 +64,7 @@ export default function SidebarLayout() {
   }, [])
 
   useEffect(() => {
-
+    dispatch(clearSprint());
   }, [selectedItem])
 
   if (firstRender) {
