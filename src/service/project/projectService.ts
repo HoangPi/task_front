@@ -198,3 +198,16 @@ export function updateProductBacklog(backlog: ProductBacklog) {
         }
     }).then((res) => res).catch(e => { throw e.response.data.message.split("\n")[0] })
 }
+
+export function createSprint(project_id: number, name: string, goal: string, start_date: string) {
+    return axiosService({
+        url: "sprints",
+        method: "POST",
+        data: {
+            project_id,
+            name,
+            goal,
+            start_date
+        }
+    }).catch(e => { throw e.response.data.message.split("\n")[0] })
+}

@@ -13,7 +13,8 @@ import {
     Stack,
     Popover,
     Grid,
-    IconButton} from '@mui/material';
+    IconButton
+} from '@mui/material';
 import {
     NavigateNext as NavigateNextIcon,
     KeyboardArrowDown as ArrowDown,
@@ -23,7 +24,8 @@ import {
     ArrowRightAlt,
     ChevronLeft,
     ChevronRight,
-    Star} from '@mui/icons-material';
+    Star
+} from '@mui/icons-material';
 import type { Sprint } from '../../../redux/storage/sprint';
 import { useAppSelector } from '../../../redux/hook';
 import { service } from '../../../service';
@@ -31,6 +33,7 @@ import { SelectedIndexContext } from '../selectItemContext';
 import { ToastContext } from '../../../components/toast/messageContetx';
 import { ToastType } from '../../../components/toast/notification';
 import { SprintPage } from './sprintBody';
+import { CreateSprintDialog } from './createSprintDialog';
 
 const CURRENT_DATE = new Date()
 const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
@@ -69,6 +72,7 @@ const MonthYearPickerPopover = ({ anchor, onClose, date, onYearChange, onMonthSe
 
 export const SprintHeader = () => {
     const [sprints, setSprints] = useState<Sprint[]>()
+    const [open, setOpen] = useState(false)
     const projects = useAppSelector(state => state.projectStorage.projects)
     const projectIndex = useContext(SelectedIndexContext)
     const [chosenSprint, setChosenSprint] = useState<Sprint | null>(null)
@@ -104,7 +108,6 @@ export const SprintHeader = () => {
     }
     const fetchSprints = async () => {
         try {
-
             const projectId = projects[projectIndex.value].id
             const result = await service.projectService.getCurrentSprint(projectId)
             if (result.length >= 1) {
@@ -122,6 +125,15 @@ export const SprintHeader = () => {
             const maxDayOfMonth = endDate.getDate()
             const end = `${toDate.year}-${toDate.month + 1}-${maxDayOfMonth}`
             const otherSprints = await service.projectService.getSprintsByRange(projectId, start, end)
+            if (result.length >= 0) {
+                setChosenSprint(result[0])
+            }
+            else if (otherSprints.length >= 0) {
+                setChosenSprint(otherSprints[otherSprints.length - 1])
+            }
+            else {
+                setChosenSprint(null)
+            }
             setSprints(otherSprints)
         }
         catch (e) {
@@ -129,123 +141,154 @@ export const SprintHeader = () => {
         }
     }
     useEffect(() => {
+        if (open) {
+            return
+        }
         fetchSprints()
-    }, [fromDate, toDate, projectIndex])
-
-    if (!chosenSprint)
-        return <>No Sprint recently</>
+    }, [fromDate, toDate, projectIndex.value, open])
 
     return (
         <Box sx={{ p: 2, borderBottom: '1px solid #edebe9' }}>
             {/* ROW 1: Date Picker Range */}
-            <Stack direction="row" alignItems="center" spacing={1} sx={{ mb: 1.5 }}>
-                <Typography variant="caption" sx={{ fontWeight: 700, color: 'text.secondary', mr: 1 }}>
-                    RANGE:
-                </Typography>
+            <Stack
+                direction="row"
+                justifyContent="space-between" // Pushes children to opposite ends
+                alignItems="center"
+                sx={{ mb: 1.5 }}
+            >
+                {/* LEFT ALIGNED: Date Range Group */}
+                <Stack direction="row" alignItems="center" spacing={1}>
+                    <Typography variant="caption" sx={{ fontWeight: 700, color: 'text.secondary', mr: 1 }}>
+                        RANGE:
+                    </Typography>
 
-                {/* FROM Button */}
+                    {/* FROM Button */}
+                    <Button
+                        variant="outlined"
+                        size="small"
+                        startIcon={<CalendarMonth fontSize="small" />}
+                        onClick={(e) => setAnchorFrom(e.currentTarget)}
+                        sx={{ textTransform: 'none', borderColor: '#edebe9', color: '#323130' }}
+                    >
+                        {months[fromDate.month]} {fromDate.year}
+                    </Button>
+
+                    <ArrowRightAlt sx={{ color: 'text.disabled' }} />
+
+                    {/* TO Button */}
+                    <Button
+                        variant="outlined"
+                        size="small"
+                        onClick={(e) => setAnchorTo(e.currentTarget)}
+                        sx={{ textTransform: 'none', borderColor: '#edebe9', color: '#323130' }}
+                    >
+                        {months[toDate.month]} {toDate.year}
+                    </Button>
+                </Stack>
+
+                {/* RIGHT ALIGNED: Create Sprint Button */}
                 <Button
-                    variant="outlined"
+                    variant="contained"
                     size="small"
-                    startIcon={<CalendarMonth fontSize="small" />}
-                    onClick={(e) => setAnchorFrom(e.currentTarget)}
-                    sx={{ textTransform: 'none', borderColor: '#edebe9', color: '#323130' }}
+                    onClick={() => {
+                        setOpen(true)
+                    }}
+                    sx={{
+                        bgcolor: '#0078d4',
+                        textTransform: 'none',
+                        fontWeight: 600,
+                        boxShadow: 'none',
+                        '&:hover': { bgcolor: '#106ebe', boxShadow: 'none' }
+                    }}
                 >
-                    {months[fromDate.month]} {fromDate.year}
-                </Button>
-
-                <ArrowRightAlt sx={{ color: 'text.disabled' }} />
-
-                {/* TO Button */}
-                <Button
-                    variant="outlined"
-                    size="small"
-                    onClick={(e) => setAnchorTo(e.currentTarget)}
-                    sx={{ textTransform: 'none', borderColor: '#edebe9', color: '#323130' }}
-                >
-                    {months[toDate.month]} {toDate.year}
+                    Create New Sprint
                 </Button>
             </Stack>
 
             {/* ROW 2: Sprint Name & Breadcrumbs */}
-            <Stack direction="row" alignItems="center" spacing={2}>
-                <Breadcrumbs separator={<NavigateNextIcon fontSize="small" />}>
-                    <Link underline="hover" color="inherit" href="#" sx={{ fontSize: '0.9rem' }}>Sprint</Link>
+            {chosenSprint ?
+                <>
+                    <Stack direction="row" alignItems="center" spacing={2}>
+                        <Breadcrumbs separator={<NavigateNextIcon fontSize="small" />}>
+                            <Link underline="hover" color="inherit" href="#" sx={{ fontSize: '0.9rem' }}>Sprint</Link>
 
-                    <Box>
-                        <Button
-                            onClick={(e) => setSprintMenuAnchor(e.currentTarget)}
-                            endIcon={<ArrowDown />}
-                            sx={{ textTransform: 'none', color: '#0078d4', fontWeight: 800, fontSize: '1.2rem', p: 0.5 }}
-                        >
-                            {chosenSprint.name}
-                        </Button>
-
-
-                        <Menu
-                            anchorEl={sprintMenuAnchor}
-                            open={Boolean(sprintMenuAnchor)}
-                            onClose={() => setSprintMenuAnchor(null)}
-                            PaperProps={{ sx: { minWidth: 240, mt: 1, boxShadow: '0px 8px 24px rgba(0,0,0,0.12)' } }}
-                        >
-                            {/* 1. All other sprints */}
-                            {sprints && sprints.map((sprint) => (
-                                <MenuItem key={sprint.id} onClick={() => { setChosenSprint(sprint); setSprintMenuAnchor(null); }} selected={sprint.id === chosenSprint.id}>
-                                    <ListItemIcon>{sprint.id === chosenSprint.id && <Check fontSize="small" />}</ListItemIcon>
-                                    <ListItemText primary={sprint.name} secondary={
-                                        `${sprint.start_date.split("-").reverse().join("/")} - ${sprint.end_date.split("-").reverse().join("/")} (${sprint.status.split("_").join(" ")})`
-                                    } />
-                                </MenuItem>
-                            ))}
-
-                            <Divider />
-
-                            {/* 2. CURRENT SPRINT (Pinned right above Add) */}
-                            {currentSprint && (
-                                <MenuItem
-                                    onClick={() => { setChosenSprint(currentSprint); setSprintMenuAnchor(null); }}
-                                    selected={currentSprint?.id === chosenSprint.id}
-                                    sx={{ bgcolor: '#fff8e1' }} // Subtle gold tint to indicate "Current"
+                            <Box>
+                                <Button
+                                    onClick={(e) => setSprintMenuAnchor(e.currentTarget)}
+                                    endIcon={<ArrowDown />}
+                                    sx={{ textTransform: 'none', color: '#0078d4', fontWeight: 800, fontSize: '1.2rem', p: 0.5 }}
                                 >
-                                    <ListItemIcon>
-                                        {currentSprint?.id === chosenSprint.id ? <Check fontSize="small" /> : <Star fontSize="small" sx={{ color: '#ffb900' }} />}
-                                    </ListItemIcon>
-                                    <ListItemText
-                                        primary={currentSprint.name}
-                                        secondary="Current Sprint"
-                                        primaryTypographyProps={{ fontWeight: 700 }}
-                                        secondaryTypographyProps={{ sx: { color: '#d89801', fontSize: '0.65rem', fontWeight: 700 } }}
-                                    />
-                                </MenuItem>
-                            )}
+                                    {chosenSprint.name}
+                                </Button>
 
-                            {/* 3. ADD BUTTON (Bottom) */}
-                            <MenuItem onClick={() => setSprintMenuAnchor(null)} sx={{ color: '#0078d4' }}>
-                                <ListItemIcon><AddIcon fontSize="small" sx={{ color: '#0078d4' }} /></ListItemIcon>
-                                <ListItemText primary="New Sprint" primaryTypographyProps={{ variant: 'body2', fontWeight: 600 }} />
-                            </MenuItem>
-                        </Menu>
-                    </Box>
-                </Breadcrumbs>
-                <Box
-                    sx={{
-                        fontSize: '0.7rem',
-                        fontWeight: 700,
-                        bgcolor: '#eff6fc',
-                        px: 1,
-                        py: 0.3,
-                        borderRadius: '4px',
-                        textTransform: 'uppercase',
-                        height: 'fit-content',
-                        lineHeight: 1
-                    }}
-                >
-                    {chosenSprint && new Date(chosenSprint.end_date) < CURRENT_DATE
-                        ? 'past'
-                        : new Date(chosenSprint.start_date) > CURRENT_DATE
-                            ? 'future' : 'current'}
-                </Box>
-            </Stack>
+
+                                <Menu
+                                    anchorEl={sprintMenuAnchor}
+                                    open={Boolean(sprintMenuAnchor)}
+                                    onClose={() => setSprintMenuAnchor(null)}
+                                    PaperProps={{ sx: { minWidth: 240, mt: 1, boxShadow: '0px 8px 24px rgba(0,0,0,0.12)' } }}
+                                >
+                                    {/* 1. All other sprints */}
+                                    {sprints && sprints.map((sprint) => (
+                                        <MenuItem key={sprint.id} onClick={() => { setChosenSprint(sprint); setSprintMenuAnchor(null); }} selected={sprint.id === chosenSprint.id}>
+                                            <ListItemIcon>{sprint.id === chosenSprint.id && <Check fontSize="small" />}</ListItemIcon>
+                                            <ListItemText primary={sprint.name} secondary={
+                                                `${sprint.start_date.split("-").reverse().join("/")} - ${sprint.end_date.split("-").reverse().join("/")} (${sprint.status.split("_").join(" ")})`
+                                            } />
+                                        </MenuItem>
+                                    ))}
+
+                                    <Divider />
+
+                                    {/* 2. CURRENT SPRINT (Pinned right above Add) */}
+                                    {currentSprint && (
+                                        <MenuItem
+                                            onClick={() => { setChosenSprint(currentSprint); setSprintMenuAnchor(null); }}
+                                            selected={currentSprint?.id === chosenSprint.id}
+                                            sx={{ bgcolor: '#fff8e1' }} // Subtle gold tint to indicate "Current"
+                                        >
+                                            <ListItemIcon>
+                                                {currentSprint?.id === chosenSprint.id ? <Check fontSize="small" /> : <Star fontSize="small" sx={{ color: '#ffb900' }} />}
+                                            </ListItemIcon>
+                                            <ListItemText
+                                                primary={currentSprint.name}
+                                                secondary="Current Sprint"
+                                                primaryTypographyProps={{ fontWeight: 700 }}
+                                                secondaryTypographyProps={{ sx: { color: '#d89801', fontSize: '0.65rem', fontWeight: 700 } }}
+                                            />
+                                        </MenuItem>
+                                    )}
+
+                                    {/* 3. ADD BUTTON (Bottom) */}
+                                    <MenuItem onClick={() => setSprintMenuAnchor(null)} sx={{ color: '#0078d4' }}>
+                                        <ListItemIcon><AddIcon fontSize="small" sx={{ color: '#0078d4' }} /></ListItemIcon>
+                                        <ListItemText primary="New Sprint" primaryTypographyProps={{ variant: 'body2', fontWeight: 600 }} />
+                                    </MenuItem>
+                                </Menu>
+                            </Box>
+                        </Breadcrumbs>
+                        <Box
+                            sx={{
+                                fontSize: '0.7rem',
+                                fontWeight: 700,
+                                bgcolor: '#eff6fc',
+                                px: 1,
+                                py: 0.3,
+                                borderRadius: '4px',
+                                textTransform: 'uppercase',
+                                height: 'fit-content',
+                                lineHeight: 1
+                            }}
+                        >
+                            {chosenSprint && new Date(chosenSprint.end_date) < CURRENT_DATE
+                                ? 'past'
+                                : new Date(chosenSprint.start_date) > CURRENT_DATE
+                                    ? 'future' : 'current'}
+                        </Box>
+                    </Stack>
+                    <SprintPage sprint={chosenSprint} createSprintBacklogHandler={handleCreateSprintBacklog} />
+                </> : <>No sprints recently</>
+            }
 
             {/* --- MONTH YEAR POPOVER (Re-usable for both) --- */}
             <MonthYearPickerPopover
@@ -263,7 +306,7 @@ export const SprintHeader = () => {
                 onYearChange={(d: number) => handleYearChange('to', d)}
                 onMonthSelect={(m: number) => handleMonthSelect('to', m)}
             />
-            <SprintPage sprint={chosenSprint} createSprintBacklogHandler={handleCreateSprintBacklog} />
+            <CreateSprintDialog open={open} onClose={() => { setOpen(false) }} />
         </Box>
     );
 };
