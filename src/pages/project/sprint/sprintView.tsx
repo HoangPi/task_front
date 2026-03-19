@@ -293,10 +293,13 @@ export const SprintHeader = () => {
 export const SprintPage = ({ sprint, createSprintBacklogHandler }: { sprint: Sprint, createSprintBacklogHandler: (backlogId: number, sprint_id: number) => Promise<void | undefined> }) => {
     const [backlogs, setBacklogs] = useState<Backlog[]>([])
     const toastContext = useContext(ToastContext)
-    useEffect(() => {
-        service.projectService.getSprintBacklogBySprintId(sprint.id)
+    const fetchSprintBacklogs = () => {
+        return service.projectService.getSprintBacklogBySprintId(sprint.id)
             .then(result => setBacklogs(result))
             .catch(e => toastContext?.dispatcher({ message: String(e), type: ToastType.ERROR }))
+    }
+    useEffect(() => {
+        fetchSprintBacklogs()
     }, [sprint])
     return (
         <Box sx={{ p: 3, bgcolor: '#fff', minHeight: '100vh' }}>
@@ -361,7 +364,9 @@ export const SprintPage = ({ sprint, createSprintBacklogHandler }: { sprint: Spr
                     </TableBody>
                 </Table>
             </TableContainer>
-            <ProductBacklogList sprint_id={sprint.id} createSprintBacklogHandler={createSprintBacklogHandler} />
+            <ProductBacklogList sprint_id={sprint.id} createSprintBacklogHandler={(backlogId: number, sprint_id: number) => {
+                return createSprintBacklogHandler(backlogId, sprint_id).then(() => { return fetchSprintBacklogs() })
+            }} />
         </Box>
     );
 };
@@ -419,7 +424,7 @@ export const ProductBacklogList = ({ sprint_id, createSprintBacklogHandler }: { 
                 sx={{ mb: 3 }}
             >
                 <Typography variant="h6" sx={{ fontWeight: 700 }}>
-                    Work Items
+                    Available product backlogs
                 </Typography>
 
                 {/* Filter & Sort Controls */}
