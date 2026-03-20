@@ -229,3 +229,14 @@ export function deleteProject(projectId: number) {
         method: "DELETE"
     }).catch(e => { throw e.response.data.message.split("\n")[0] })
 }
+
+export function createInvites(projectId: number, invitees: number[]) {
+    return axiosService({
+        url: `invite/projects/many`,
+        method: "POST",
+        data: {
+            project_id: projectId,
+            invitees
+        }
+    }).catch(e => { throw e.response.data.message.split("\n")[0] })
+}

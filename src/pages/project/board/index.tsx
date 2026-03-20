@@ -42,6 +42,7 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import { clearSprint } from '../../../redux/storage/sprint';
 import { ToastContext } from '../../../components/toast/messageContetx';
 import { ToastType } from '../../../components/toast/notification';
+import { AddMemberButton } from './components/searchUserButton';
 
 const drawerWidth = 260;
 
@@ -246,9 +247,10 @@ export default function SidebarLayout() {
           <Box sx={{ px: 2, pb: 2, pt: 1 }}>
             <Divider sx={{ mb: 2 }} />
             <Stack spacing={1}>
+              <AddMemberButton project_id={projects[selectedItem].id}/>
               <Button
                 variant="contained"
-                startIcon={<Add />} // Assuming you have imported Add from @mui/icons-material
+                startIcon={<Add />}
                 onClick={() => { setOpen(true) }}
                 fullWidth
                 sx={{
@@ -256,13 +258,14 @@ export default function SidebarLayout() {
                   textTransform: 'none',
                   fontWeight: 600,
                   boxShadow: 'none',
-                  justifyContent: 'flex-start', // Aligns icon and text to the left
+                  justifyContent: 'flex-start',
                   px: 2,
                   '&:hover': { bgcolor: '#106ebe', boxShadow: 'none' }
                 }}
               >
                 Create New Project
               </Button>
+
 
               <Button
                 variant="outlined"

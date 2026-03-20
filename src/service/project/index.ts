@@ -1,4 +1,4 @@
-import { createProductBacklog, createProject, createSprint, createSprintBacklog, deleteProject, getCurrentSprint, getProductBacklogs, getProjects, getSprintBacklogBySprintId, getSprintsByRange, getTaskBySprintBacklogId, getUserByProjectIdAndEmail, updateProductBacklog, updateSprintBacklog, updateTasks } from "./projectService";
+import { createInvites, createProductBacklog, createProject, createSprint, createSprintBacklog, deleteProject, getCurrentSprint, getProductBacklogs, getProjects, getSprintBacklogBySprintId, getSprintsByRange, getTaskBySprintBacklogId, getUserByProjectIdAndEmail, updateProductBacklog, updateSprintBacklog, updateTasks } from "./projectService";
 
 export const projectService = {
     getProjects: getProjects,
@@ -15,5 +15,6 @@ export const projectService = {
     updateProductBacklog,
     createSprint,
     createProject,
-    deleteProject
+    deleteProject,
+    createInvites
 }

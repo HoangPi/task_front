@@ -14,7 +14,7 @@ export const InvitationActionPage = () => {
             return
         }
         service.userService.updateInvitation(noticeContext?.message?.id, true)
-            .then(() => toastContext?.dispatcher({ message: "You have been added to the project", type: ToastType.SUCCESS }))
+            .then(() => toastContext?.dispatcher({ message: "You have been added to the project", type: ToastType.INFO }))
             .catch((e) => toastContext?.dispatcher({ message: e, type: ToastType.ERROR }))
     };
     const handleDecline = () => {
@@ -22,7 +22,7 @@ export const InvitationActionPage = () => {
             return
         }
         service.userService.updateInvitation(noticeContext?.message?.id, false)
-            .then(() => toastContext?.dispatcher({ message: "You have been added to the project", type: ToastType.SUCCESS }))
+            .then(() => toastContext?.dispatcher({ message: "You have declined the invitation", type: ToastType.INFO }))
             .catch((e) => toastContext?.dispatcher({ message: e, type: ToastType.ERROR }))
     };
 
