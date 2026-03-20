@@ -57,3 +57,16 @@ export function changePassword(userId: number, oldPassword: string, newPassword:
         }
     }).then(res => res).catch((e) => { console.log(e); throw e.response.data.message.split("\n")[0] || e })
 }
+
+export function createUser(username: string, name: string, email: string, password: string) {
+    return axiosService({
+        url: '/users',
+        method: "POST",
+        data: {
+            username,
+            name,
+            email,
+            password
+        }
+    }).then(res => res).catch((e) => { console.log(e); throw e.response.data.message.split("\n")[0] || e })
+}

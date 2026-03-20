@@ -12,6 +12,7 @@ import { ToastContext } from "./components/toast/messageContetx"
 import { service } from "./service"
 import { addProjectBulk } from "./redux/storage/project"
 import ProfilePage from "./pages/profile"
+import { SignUpPage } from "./pages/signup"
 
 function App() {
   const [toastState, setToastState] = useState<ToastState | null>(null)
@@ -42,7 +43,8 @@ function App() {
       <Routes>
         <Route index element={<HomePage />}></Route>
         <Route path="/signin" element={<SignInPage></SignInPage>} />
-        <Route action={()=>console.log("Hello")} path="/dashboard/*" element={<SidebarLayout />}></Route>
+        <Route path="/signup" element={<SignUpPage></SignUpPage>} />
+        <Route  path="/dashboard/*" element={<SidebarLayout />}></Route>
         <Route path="/profile" element={<ProfilePage />} />
       </Routes>
     </ToastContext>

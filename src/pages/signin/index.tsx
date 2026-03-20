@@ -92,7 +92,7 @@ export default function SignInPage() {
                             defaultValue={username}
                             onChange={(ev) => { setUsername(ev.target.value) }}
                             autoFocus
-                            onFocus={()=>setError("")}
+                            onFocus={() => setError("")}
                             error={error !== ""}
                             helperText={error ? String(error) : ""} // This works because it's a string
                         />
@@ -107,7 +107,7 @@ export default function SignInPage() {
                             type={showPassword ? 'text' : 'password'}
                             id="password"
                             autoComplete="current-password"
-                            onFocus={()=>setError("")}
+                            onFocus={() => setError("")}
                             error={error !== ""}
                             InputProps={{
                                 endAdornment: (
@@ -153,7 +153,7 @@ export default function SignInPage() {
                                 </Link>
                             </Grid>
                             <Grid size={12}>
-                                <Link href="#" variant="body2" underline="hover">
+                                <Link href="#" onClick={() => navigate('/signup')} variant="body2" underline="hover">
                                     {"Don't have an account? Sign Up"}
                                 </Link>
                             </Grid>

@@ -211,3 +211,21 @@ export function createSprint(project_id: number, name: string, goal: string, sta
         }
     }).catch(e => { throw e.response.data.message.split("\n")[0] })
 }
+
+// TODO Make payload not any type
+export function createProject(payload: any) {
+    return axiosService({
+        url: "project",
+        method: "POST",
+        data: {
+            ...payload
+        }
+    }).catch(e => { throw e.response.data.message.split("\n")[0] })
+}
+
+export function deleteProject(projectId: number) {
+    return axiosService({
+        url: `project/${projectId}`,
+        method: "DELETE"
+    }).catch(e => { throw e.response.data.message.split("\n")[0] })
+}
