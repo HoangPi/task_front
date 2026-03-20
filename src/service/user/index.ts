@@ -1,5 +1,8 @@
-import { logIn } from "./userService";
+import { changePassword, logIn, updateUser, VerifyUserSession } from "./userService";
 
 export const UserService = {
-    logIn
+    logIn,
+    VerifyUserSession,
+    updateUser,
+    changePassword
 }

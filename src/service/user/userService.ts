@@ -20,7 +20,7 @@ export function logIn(username: string, password: string): Promise<User> {
 
 export async function VerifyUserSession(): Promise<User> {
     try {
-        if(!localStorage.getItem("access")){
+        if (!localStorage.getItem("access")) {
             throw "Access token not found"
         }
         const res = await axiosService({
@@ -32,4 +32,28 @@ export async function VerifyUserSession(): Promise<User> {
     catch (e) {
         throw e
     }
+}
+
+export function updateUser(userId: number, name: string, email: string) {
+    return axiosService({
+        url: '/users',
+        method: "PUT",
+        data: {
+            id: userId,
+            name,
+            email
+        }
+    }).then(res => res).catch((e) => { throw e.response.data.message.split("\n")[0] })
+}
+
+export function changePassword(userId: number, oldPassword: string, newPassword: string) {
+    return axiosService({
+        url: '/users/change_password',
+        method: "PUT",
+        data: {
+            id: userId,
+            oldPassword,
+            newPassword
+        }
+    }).then(res => res).catch((e) => { console.log(e); throw e.response.data.message.split("\n")[0] || e })
 }
