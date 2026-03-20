@@ -1,3 +1,4 @@
+import type { UserNotification } from "../../components/nav/navigationSmall";
 import type { User } from "../../redux/storage/user";
 import { axiosService } from "../axiosService";
 import { jwtDecode } from "jwt-decode"
@@ -68,5 +69,26 @@ export function createUser(username: string, name: string, email: string, passwo
             email,
             password
         }
+    }).then(res => res).catch((e) => { console.log(e); throw e.response.data.message.split("\n")[0] || e })
+}
+
+export function getNotification(offset: number) {
+    return axiosService({
+        url: `notifications?offset=${offset}`,
+        method: "GET"
+    }).then(res => res.data as UserNotification[]).catch((e) => { console.log(e); throw e.response.data.message.split("\n")[0] || e })
+}
+
+export function updateInvitation(inviteId: number, accept: boolean) {
+    return axiosService({
+        url: `invite/project?id=${inviteId}&accept=${accept}`,
+        method: "POST"
+    }).then(res => res).catch((e) => { console.log(e); throw e.response.data.message.split("\n")[0] || e })
+}
+
+export function handleNotification(willDelete: boolean, id?: number) {
+    return axiosService({
+        url: `notifications?willDelete=${willDelete}&id=${id || -1}`,
+        method: "POST"
     }).then(res => res).catch((e) => { console.log(e); throw e.response.data.message.split("\n")[0] || e })
 }

@@ -13,16 +13,21 @@ import { service } from "./service"
 import { addProjectBulk } from "./redux/storage/project"
 import ProfilePage from "./pages/profile"
 import { SignUpPage } from "./pages/signup"
+import { InvitationActionPage } from "./pages/invite"
+import { NotificationContext } from "./components/nav/notificationContext"
+import { type UserNotification } from "./components/nav/navigationSmall"
 
 function App() {
   const [toastState, setToastState] = useState<ToastState | null>(null)
   const dispatch = useAppDispatch()
   const user = useAppSelector(state => state.user)
+  const [selectedNotification, setSelectedNotification] = useState<UserNotification | null>(null)
+
   useEffect(() => {
-    if (!user.userId) {
-      localStorage.removeItem("access")
-      return
-    }
+    // if (!user.userId) {
+    //   localStorage.removeItem("access")
+    //   return
+    // }
     VerifyUserSession()
       .then(res => {
         return dispatch(setUserInfo(res))
@@ -38,15 +43,18 @@ function App() {
 
   return (<>
     <ToastContext value={{ data: toastState, dispatcher: setToastState }}>
-      <NavBar />
-      <GlobalToast />
-      <Routes>
-        <Route index element={<HomePage />}></Route>
-        <Route path="/signin" element={<SignInPage></SignInPage>} />
-        <Route path="/signup" element={<SignUpPage></SignUpPage>} />
-        <Route  path="/dashboard/*" element={<SidebarLayout />}></Route>
-        <Route path="/profile" element={<ProfilePage />} />
-      </Routes>
+      <NotificationContext value={{message: selectedNotification, dispatch: setSelectedNotification}}>
+        <NavBar />
+        <GlobalToast />
+        <Routes>
+          <Route index element={<HomePage />}></Route>
+          <Route path="/signin" element={<SignInPage></SignInPage>} />
+          <Route path="/signup" element={<SignUpPage></SignUpPage>} />
+          <Route path="/dashboard/*" element={<SidebarLayout />}></Route>
+          <Route path="/profile" element={<ProfilePage />} />
+          <Route path="/invite/project" element={<InvitationActionPage />} />
+        </Routes>
+      </NotificationContext>
     </ToastContext>
   </>
   )

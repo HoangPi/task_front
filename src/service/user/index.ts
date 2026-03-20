@@ -1,9 +1,12 @@
-import { changePassword, createUser, logIn, updateUser, VerifyUserSession } from "./userService";
+import { changePassword, createUser, getNotification, handleNotification, logIn, updateInvitation, updateUser, VerifyUserSession } from "./userService";
 
 export const UserService = {
     logIn,
     VerifyUserSession,
     updateUser,
     changePassword,
-    createUser
+    createUser,
+    getNotification,
+    updateInvitation,
+    handleNotification
 }
