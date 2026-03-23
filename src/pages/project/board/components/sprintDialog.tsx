@@ -121,7 +121,6 @@ export const WorkItemDialog = ({ open, handleClose, backlog }: { open: boolean, 
             setDescription(backlog.notes)
             service.projectService.getTaskBySprintBacklogId(backlog.id)
                 .then(res => {
-                    console.log(res)
                     setOriginalTask(res)
                     setTasks(res.map(task => ({ ...task, state: 'origin' })))
                 }).catch(e => toastContext?.dispatcher({ message: String(e), type: ToastType.ERROR }))
