@@ -7,9 +7,11 @@ import { service } from "../../../service";
 import type { Backlog } from "../board/components/sprintCard";
 import { SelectedIndexContext } from "../selectItemContext";
 import { ProductBacklogList } from "./backlogSelector";
+import { WorkItemDialog } from "../board/components/sprintDialog";
 
 export const SprintPage = ({ sprint, createSprintBacklogHandler }: { sprint: Sprint, createSprintBacklogHandler: (backlogId: number, sprint_id: number) => Promise<void | undefined> }) => {
     const [backlogs, setBacklogs] = useState<Backlog[]>([])
+    const [selectedBacklog, setSelectedBacklog] = useState<Backlog | null>(null)
     const projectIndex = useContext(SelectedIndexContext)
     const toastContext = useContext(ToastContext)
     const fetchSprintBacklogs = () => {
@@ -34,6 +36,7 @@ export const SprintPage = ({ sprint, createSprintBacklogHandler }: { sprint: Spr
                     <TableBody>
                         {backlogs.map((item) => (
                             <TableRow
+                                onClick={() => setSelectedBacklog(item)}
                                 key={item.id}
                                 hover
                                 sx={{ '&:last-child td, &:last-child th': { border: 0 }, cursor: 'pointer' }}
@@ -83,6 +86,9 @@ export const SprintPage = ({ sprint, createSprintBacklogHandler }: { sprint: Spr
                     </TableBody>
                 </Table>
             </TableContainer>
+            {selectedBacklog && <WorkItemDialog open={selectedBacklog !== null} handleClose={() => {
+                fetchSprintBacklogs().then(() => setSelectedBacklog(null))
+            }} backlog={selectedBacklog} />}
             <ProductBacklogList sprint_id={sprint.id} createSprintBacklogHandler={(backlogId: number, sprint_id: number) => {
                 return createSprintBacklogHandler(backlogId, sprint_id).then(() => { return fetchSprintBacklogs() })
             }} />
