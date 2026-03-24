@@ -3,6 +3,9 @@
 name: CI
 
 # Controls when the workflow will run
+permissions:
+  contents: read
+  id-token: write
 on:
   # Triggers the workflow on push or pull request events but only for the "main" branch
   push:
@@ -24,7 +27,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: 24
           cache: npm
 
       - name: Install dependencies
