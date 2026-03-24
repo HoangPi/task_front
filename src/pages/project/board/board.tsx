@@ -59,6 +59,14 @@ export default function AzureBoard() {
                         setCurrentSprint(result[0])
                     }
                 }
+                else {
+                    if (before) {
+                        dispatch(reduxService.sprintservice.pushFront({ data: result, hasMoreToFetch: false }))
+                    }
+                    else {
+                        dispatch(reduxService.sprintservice.pushBack({ data: result, hasMoreToFetch: false }))
+                    }
+                }
             }).catch(e => toastContext?.dispatcher({ message: String(e), type: ToastType.ERROR }))
     }
 

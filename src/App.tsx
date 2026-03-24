@@ -28,7 +28,6 @@ function App() {
     //   localStorage.removeItem("access")
     //   return
     // }
-    console.log(import.meta.env.VITE_SERVER_BASE_URL)
     VerifyUserSession()
       .then(res => {
         return dispatch(setUserInfo(res))
