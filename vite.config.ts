@@ -7,5 +7,5 @@ export default defineConfig({
   server: {
     allowedHosts: ["8904-58-186-223-244.ngrok-free.app"]
   },
-  base: '/task_front/',
+  base: '/task_front',
 })
