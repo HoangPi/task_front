@@ -16,18 +16,47 @@ import { SignUpPage } from "./pages/signup"
 import { InvitationActionPage } from "./pages/invite"
 import { NotificationContext } from "./components/nav/notificationContext"
 import { type UserNotification } from "./components/nav/navigationSmall"
+import { ServerStatusPage } from "./pages/serverStatus"
+import { axiosService } from "./service/axiosService"
 
 function App() {
+  const [isServerConnected, setIsServerConnected] = useState(false)
+  const [isTryingToConnect, setIsTryingToConnect] = useState(true);
   const [toastState, setToastState] = useState<ToastState | null>(null)
   const dispatch = useAppDispatch()
   const user = useAppSelector(state => state.user)
   const [selectedNotification, setSelectedNotification] = useState<UserNotification | null>(null)
 
+  const connectToServer = () => {
+    setIsTryingToConnect(true);
+    axiosService({
+      url: '',
+      method: "GET",
+      timeout: 60000
+    })
+      .then(()=>{
+        return new Promise<void>((resolve)=>{
+          setTimeout(() => {
+            resolve()
+          }, 1000);
+        })
+      })
+      .then(() => {
+        setIsServerConnected(true)
+      })
+      .catch(() => {
+        setIsServerConnected(false)
+      })
+      .finally(() => {
+        setIsTryingToConnect(false);
+      })
+  }
+
   useEffect(() => {
-    // if (!user.userId) {
-    //   localStorage.removeItem("access")
-    //   return
-    // }
+    if (!localStorage.getItem('access')) {
+      dispatch(removeUserInfomation());
+      return
+    }
     VerifyUserSession()
       .then(res => {
         return dispatch(setUserInfo(res))
@@ -41,9 +70,26 @@ function App() {
       })
   }, [user])
 
+  useEffect(() => {
+    if (!isTryingToConnect) {
+      return
+    }
+    if (!isServerConnected) {
+      connectToServer()
+    }
+  }, [isServerConnected, isTryingToConnect])
+
+  if (!isServerConnected) {
+    return (
+      <ServerStatusPage isTryingToConnect={isTryingToConnect} isServerDown={!isServerConnected} onRetry={() => {
+        setIsServerConnected(false)
+        setIsTryingToConnect(true)
+      }} />)
+  }
+
   return (<>
     <ToastContext value={{ data: toastState, dispatcher: setToastState }}>
-      <NotificationContext value={{message: selectedNotification, dispatch: setSelectedNotification}}>
+      <NotificationContext value={{ message: selectedNotification, dispatch: setSelectedNotification }}>
         <NavBar />
         <GlobalToast />
         <Routes>
