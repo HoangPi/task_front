@@ -16,7 +16,7 @@ function NavAnonymous({ navigate }: { navigate: NavigateFunction }) {
     </>
 }
 
-function NavLoged({ navigate }: { navigate: NavigateFunction }) {
+export function NavLoged({ navigate }: { navigate: NavigateFunction }) {
     const [expanded, setExpanded] = useState(false);
     const user = useAppSelector((s) => s.user)
     const dispatch = useAppDispatch()
@@ -125,9 +125,8 @@ function NavLoged({ navigate }: { navigate: NavigateFunction }) {
 }
 
 export function NavSmall({ navigate }: { navigate: NavigateFunction }) {
-    const user = useAppSelector(state => state.user)
     return <>
-        {user.userId === null ? <NavAnonymous navigate={navigate}></NavAnonymous> : <NavLoged navigate={navigate}></NavLoged>}
+        <NavAnonymous navigate={navigate}></NavAnonymous>
     </>
 }
 
