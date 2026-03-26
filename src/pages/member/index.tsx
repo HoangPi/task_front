@@ -140,7 +140,14 @@ export const MembersPage = () => {
                             <Stack direction="row" alignItems="center" spacing={1}>
                                 <IconButton
                                     size="small"
-                                    onClick={() => setEmPage(prev => Math.max(0, prev - 1))}
+                                    onClick={() => {
+                                        service.projectService.getMembersOfProject(projects[projectIndex].id, 'EM', emPage - 1)
+                                            .then(res => {
+                                                setEmPage((e) => e - 1)
+                                                setSearchMembers(res)
+                                            })
+                                            .catch(e => toastContext?.dispatcher({ message: e, type: ToastType.ERROR }))
+                                    }}
                                     disabled={emPage === 0}
                                     sx={{ border: '1px solid #edebe9', borderRadius: 1 }}
                                 >
