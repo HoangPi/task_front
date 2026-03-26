@@ -1,3 +1,4 @@
+import type { MemberInfoWithRole } from "../../pages/member"
 import type { Backlog } from "../../pages/project/board/components/sprintCard"
 import type { LocalTask, Task } from "../../pages/project/board/components/sprintDialog"
 import type { Project } from "../../redux/storage/project"
@@ -239,4 +240,11 @@ export function createInvites(projectId: number, invitees: number[]) {
             invitees
         }
     }).catch(e => { throw e.response.data.message.split("\n")[0] })
+}
+
+export function getMembersOfProject(projectId: number, type: 'EM' | string, offset: number) {
+    return axiosService({
+        url: `project/members?projectId=${projectId}&type=${type}&offset=${offset}`,
+        method: "GET"
+    }).then((res) => res.data as MemberInfoWithRole[]).catch(e => { throw e.response.data.message.split("\n")[0] })
 }

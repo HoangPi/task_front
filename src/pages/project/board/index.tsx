@@ -207,11 +207,15 @@ export default function SidebarLayout() {
           </ListItemButton>
           <Collapse in={openOverview} timeout="auto" unmountOnExit>
             <List component="div" disablePadding>
-              {['Home', 'Analytics', 'Reports'].map((text) => (
-                <ListItemButton key={text} sx={{ pl: 4 }}>
-                  <ListItemText primary={text} />
-                </ListItemButton>
-              ))}
+              <ListItemButton key={'Home'} sx={{ pl: 4 }}>
+                <ListItemText primary={'Home'} />
+              </ListItemButton>
+              <ListItemButton onClick={()=>navigate('/dashboard/members')} key={'Members'} sx={{ pl: 4 }}>
+                <ListItemText primary={'Members'} />
+              </ListItemButton>
+              <ListItemButton key={'Reports'} sx={{ pl: 4 }}>
+                <ListItemText primary={'Reports'} />
+              </ListItemButton>
             </List>
           </Collapse>
 
@@ -247,7 +251,7 @@ export default function SidebarLayout() {
           <Box sx={{ px: 2, pb: 2, pt: 1 }}>
             <Divider sx={{ mb: 2 }} />
             <Stack spacing={1}>
-              <AddMemberButton project_id={projects[selectedItem].id}/>
+              <AddMemberButton project_id={projects[selectedItem].id} />
               <Button
                 variant="contained"
                 startIcon={<Add />}

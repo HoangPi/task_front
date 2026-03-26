@@ -1,3 +1,4 @@
+import { MembersPage } from "../../member";
 import { ProductBacklogPage } from "../backlog/backlog";
 import { SprintHeader } from "../sprint/sprintView";
 // import AzureBacklogPage from "./backlog";
@@ -11,6 +12,8 @@ export function BoardSelector({ path }: { path: string }) {
             return <ProductBacklogPage />
         case ("/dashboard/sprint"):
             return <SprintHeader />
+        case ("/dashboard/members"):
+            return <MembersPage />
         default:
             return <AzureBoard />
     }
