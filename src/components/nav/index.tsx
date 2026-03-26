@@ -8,10 +8,12 @@ import Menu from '@mui/material/Menu';
 import MenuItem from '@mui/material/MenuItem';
 import MenuIcon from '@mui/icons-material/Menu';
 import { useNavigate } from "react-router-dom"
-import { NavSmall } from './navigationSmall';
+import { NavLoged, NavSmall } from './navigationSmall';
+import { useAppSelector } from '../../redux/hook';
 
 export function NavBar() {
     const navigate = useNavigate();
+    const user = useAppSelector(s => s.user)
     const [anchorEl, setAnchorEl] = useState<EventTarget & HTMLButtonElement | null>(null);
 
     const handleOpenMenu = (event: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
@@ -30,31 +32,44 @@ export function NavBar() {
                 </Button>
 
                 {/* Desktop View: Pseudo Buttons */}
-                <Box sx={{ display: { xs: 'none', md: 'flex' } }}>
-                    <NavSmall navigate={navigate} />
-                </Box>
+                {
+                    user.userId === null
+                        ? <>
+                            <Box sx={{ display: { xs: 'none', md: 'flex' } }}>
+                                <NavSmall navigate={navigate} />
+                            </Box>
 
-                {/* Mobile View: Expandable Hamburger Menu */}
-                <Box sx={{ display: { xs: 'flex', md: 'none' } }}>
-                    <IconButton
-                        size="large"
-                        onClick={(event) => handleOpenMenu(event)}
-                    >
-                        <MenuIcon />
-                    </IconButton>
-                    <Menu
-                        anchorEl={anchorEl}
-                        open={Boolean(anchorEl)}
-                        onClose={handleCloseMenu}
-                        sx={{ display: { xs: 'block', md: 'none' } }}
-                    >
-                        <MenuItem onClick={() => {
-                            navigate("/hello")
-                            handleCloseMenu()
-                        }}>Pseudo Button 1</MenuItem>
-                        <MenuItem onClick={handleCloseMenu}>Pseudo Button 2</MenuItem>
-                    </Menu>
-                </Box>
+                            {/* Mobile View: Expandable Hamburger Menu */}
+                            <Box sx={{ display: { xs: 'flex', md: 'none' } }}>
+                                <IconButton
+                                    size="large"
+                                    onClick={(event) => handleOpenMenu(event)}
+                                >
+                                    <MenuIcon />
+                                </IconButton>
+                                <Menu
+                                    anchorEl={anchorEl}
+                                    open={Boolean(anchorEl)}
+                                    onClose={handleCloseMenu}
+                                    sx={{ display: { xs: 'block', md: 'none' } }}
+                                >
+                                    <MenuItem onClick={() => {
+                                        navigate("/signin");
+                                        handleCloseMenu();
+                                    }}>Sign in</MenuItem>
+                                    <MenuItem onClick={() => {
+                                        navigate("/signup");
+                                        handleCloseMenu();
+                                    }}>Sign up</MenuItem>
+                                </Menu>
+                            </Box>
+                        </>
+                        : <>
+                            <Box sx={{ display: 'flex' }}>
+                                <NavLoged navigate={navigate} />
+                            </Box>
+                        </>
+                }
             </Toolbar>
         </AppBar>
         <Toolbar />
