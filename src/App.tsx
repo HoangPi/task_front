@@ -25,17 +25,19 @@ function App() {
   const [toastState, setToastState] = useState<ToastState | null>(null)
   const dispatch = useAppDispatch()
   const user = useAppSelector(state => state.user)
+  const [hasDisplayServerStatus, setHasDisplayServerStatus] = useState(false)
   const [selectedNotification, setSelectedNotification] = useState<UserNotification | null>(null)
 
   const connectToServer = () => {
     setIsTryingToConnect(true);
+    setHasDisplayServerStatus(false)
     axiosService({
       url: '',
       method: "GET",
       timeout: 60000
     })
-      .then(()=>{
-        return new Promise<void>((resolve)=>{
+      .then(() => {
+        return new Promise<void>((resolve) => {
           setTimeout(() => {
             resolve()
           }, 1000);
@@ -48,6 +50,9 @@ function App() {
         setIsServerConnected(false)
       })
       .finally(() => {
+        setTimeout(() => {
+          setHasDisplayServerStatus(true)
+        }, 1700);
         setIsTryingToConnect(false);
       })
   }
@@ -79,7 +84,7 @@ function App() {
     }
   }, [isServerConnected, isTryingToConnect])
 
-  if (!isServerConnected) {
+  if (!isServerConnected || !hasDisplayServerStatus) {
     return (
       <ServerStatusPage isTryingToConnect={isTryingToConnect} isServerDown={!isServerConnected} onRetry={() => {
         setIsServerConnected(false)
