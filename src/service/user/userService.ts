@@ -31,8 +31,8 @@ export async function VerifyUserSession(): Promise<User> {
         res.data.userId = res.data.id
         return res.data as User
     }
-    catch (e) {
-        throw e
+    catch (er: any) {
+        throw er.response.data.message.split("\n")[0]
     }
 }
 
