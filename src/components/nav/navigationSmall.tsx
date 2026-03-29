@@ -100,6 +100,7 @@ export function NavLoged({ navigate }: { navigate: NavigateFunction }) {
                                 endIcon={<LogoutOutlined />}
                                 onClick={() => {
                                     localStorage.removeItem("access")
+                                    localStorage.removeItem("refresh")
                                     dispatch(removeUserInfomation());
                                     navigate("/")
                                 }}

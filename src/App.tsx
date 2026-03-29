@@ -58,7 +58,7 @@ function App() {
   }
 
   useEffect(() => {
-    if (!localStorage.getItem('access')) {
+    if (!localStorage.getItem('access') && !localStorage.getItem('refresh')) {
       dispatch(removeUserInfomation());
       return
     }
@@ -70,6 +70,7 @@ function App() {
       .then(res => dispatch(addProjectBulk(res)))
       .catch((e) => {
         localStorage.removeItem("access")
+        localStorage.removeItem("refresh")
         dispatch(removeUserInfomation())
         setToastState({ message: String(e), type: ToastType.ERROR })
       })
