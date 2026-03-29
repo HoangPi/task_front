@@ -1,4 +1,4 @@
-import axios, { type AxiosInstance } from "axios";
+import axios, { AxiosError, type AxiosInstance } from "axios";
 
 export const axiosService: AxiosInstance = axios.create(
     {
@@ -10,8 +10,7 @@ export const axiosService: AxiosInstance = axios.create(
 axiosService.interceptors.request.use(
     // Normal request
     (config) => {
-        if(config.url === '/users/login')
-        {
+        if (config.url === '/users/login') {
             config.headers.Authorization = undefined
         }
         config.headers.Authorization = `Bearer ${localStorage.getItem("access")}`
@@ -21,3 +20,35 @@ axiosService.interceptors.request.use(
     (error) => {
         return Promise.reject(error)
     })
+
+axiosService.interceptors.response.use(
+    (config) => {
+        return config
+    }, (err: AxiosError) => {
+        if (err.status === 401 && (err.response?.data as any).message.split("\n")[0] === 'Token has expired') {
+            if (!err.config) {
+                return Promise.reject(err)
+            }
+            if (err.config?.headers["x-retried"]) {
+                return Promise.reject(err)
+            }
+
+            err.config.headers["x-retried"] = true
+            return axiosService({
+                url: "/users/refresh",
+                method: "POST",
+                data: {
+                    refresh: localStorage.getItem("refresh")
+                },
+                headers: {
+                    "x-retried": true
+                }
+            }).then((res) => {
+                localStorage.setItem("access", res.data.token)
+                // The custom service should add the newest token from localstorage
+                return axiosService({ ...err.config })
+            }).catch(e => { throw e })
+        }
+        return Promise.reject(err)
+    }
+)
