@@ -13,7 +13,9 @@ axiosService.interceptors.request.use(
         if (config.url === '/users/login') {
             config.headers.Authorization = undefined
         }
-        config.headers.Authorization = `Bearer ${localStorage.getItem("access")}`
+        else {
+            config.headers.Authorization = `Bearer ${localStorage.getItem("access")}`
+        }
         return config
     },
     // failed request
