@@ -15,6 +15,7 @@ export function logIn(username: string, password: string): Promise<User> {
     })
         .then(response => {
             localStorage.setItem("access", response.data.token)
+            localStorage.setItem("refresh", response.data.refresh)
             return jwtDecode<User>(response.data.token)
         })
         .catch(error => { throw error })
@@ -22,9 +23,6 @@ export function logIn(username: string, password: string): Promise<User> {
 
 export async function VerifyUserSession(): Promise<User> {
     try {
-        if (!localStorage.getItem("access")) {
-            throw "Access token not found"
-        }
         const res = await axiosService({
             url: `/users`
         })
