@@ -169,7 +169,7 @@ export default function AzureBoard() {
                 control={
                     <Checkbox
                         checked={assignedToMe}
-                        onChange={(ev, checked) => { setAssignedToMe(checked) }}
+                        onChange={(_ev, checked) => { setAssignedToMe(checked) }}
                         name="assignedToMe"
                         color="primary"
                     />
