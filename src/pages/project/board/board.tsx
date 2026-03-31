@@ -7,6 +7,8 @@ import {
     Stack,
     Divider,
     LinearProgress,
+    Checkbox,
+    FormControlLabel,
 } from '@mui/material';
 import { Add, MoreHoriz, ChevronRight, ChevronLeft } from '@mui/icons-material';
 import { SelectedIndexContext } from '../selectItemContext';
@@ -24,6 +26,8 @@ export default function AzureBoard() {
     const [backlogs, setBacklogs] = useState<Backlog[]>([])
 
     const projects = useAppSelector(s => s.projectStorage.projects)
+    const [assignedToMe, setAssignedToMe] = useState(false);
+    const user = useAppSelector(s => s.user)
     const previousSprint = useAppSelector((state) => getNeighborSprint(state, currentSprint?.id ?? 0, true))
     const nextSprint = useAppSelector((state) => getNeighborSprint(state, currentSprint?.id ?? 0, false))
     const prev = useAppSelector(hasPrev)
@@ -161,7 +165,17 @@ export default function AzureBoard() {
                     sx={{ height: 6, borderRadius: 1 }}
                 />
             </div>
-
+            <FormControlLabel
+                control={
+                    <Checkbox
+                        checked={assignedToMe}
+                        onChange={(ev, checked) => { setAssignedToMe(checked) }}
+                        name="assignedToMe"
+                        color="primary"
+                    />
+                }
+                label="Assigned to me"
+            />
             {/* Board Columns */}
             <Box sx={{ display: 'flex', gap: 2, overflowX: 'auto', pb: 2, flexGrow: 1, alignItems: 'stretch' }}>
                 {[
@@ -214,7 +228,7 @@ export default function AzureBoard() {
                             minHeight: 100,
                             overflowY: 'auto' // Optional: lets the container scroll if cards exceed page height
                         }}>
-                            {backlogs?.filter(b => b.status === item[1]).map(b => (
+                            {backlogs?.filter(b => b.status === item[1] && (!assignedToMe || b.task_owner === user.userId)).map(b => (
                                 <WorkItemCard key={b.id} backlog={b} reloadBacklogs={getBacklogs} />
                             ))}
                         </Box>
