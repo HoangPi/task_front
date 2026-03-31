@@ -14,6 +14,7 @@ export interface Backlog {
     email: string | null;
     status: 'on_going' | 'created' | 'in_review' | 'completed' | 'failed' | string;
     notes: string;
+    acceptance_criteria: string;
     estimated_story_point: number;
     actual_story_point: number;
 }

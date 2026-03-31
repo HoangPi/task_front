@@ -192,17 +192,27 @@ export const WorkItemDialog = ({ open, handleClose, backlog }: { open: boolean, 
                     </Grid>
 
                     {/* [sprint_name (hardcode)] size 12 */}
-                    <Grid size={12} sx={{ mt: -2 }}>
+                    {/* <Grid size={12} sx={{ mt: -2 }}>
                         <Typography variant="caption" sx={{ fontWeight: 700, color: 'text.secondary' }}>
                             {backlog.backlog_name}
                         </Typography>
-                    </Grid>
+                    </Grid> */}
 
                     {/* METADATA ROW: size 12 parent */}
                     <Grid size={12}>
                         <Grid container spacing={2} alignItems="flex-start">
 
                             {/* [Owner Button & Email] size 4 */}
+                            <Grid size={4}>
+                                <Typography variant="caption" sx={{ fontWeight: 700, color: 'text.secondary' }}>
+                                    Owner
+                                </Typography>
+                            </Grid>
+                            <Grid size={8}>
+                                <Typography variant="caption" sx={{ fontWeight: 700, color: 'text.secondary' }}>
+                                    Status
+                                </Typography>
+                            </Grid>
                             <Grid size={4}>
                                 <Stack spacing={1}>
                                     <Button
@@ -291,6 +301,20 @@ export const WorkItemDialog = ({ open, handleClose, backlog }: { open: boolean, 
                             value={description}
                             onChange={(e) => setDescription(e.target.value)}
                             sx={{ bgcolor: '#faf9f8' }}
+                        />
+                    </Grid>
+                    <Grid size={12}>
+                        <Typography variant="subtitle2" sx={{ mb: 1, fontWeight: 700 }}>Acceptance criteria</Typography>
+                        <TextField
+                            fullWidth
+                            multiline
+                            rows={3}
+                            variant="outlined"
+                            slotProps={{
+                                input: { readOnly: true }
+                            }}
+                            placeholder="Add a detailed description..."
+                            value={backlog.acceptance_criteria}
                         />
                     </Grid>
 
