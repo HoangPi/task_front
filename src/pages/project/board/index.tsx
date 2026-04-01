@@ -207,10 +207,10 @@ export default function SidebarLayout() {
           </ListItemButton>
           <Collapse in={openOverview} timeout="auto" unmountOnExit>
             <List component="div" disablePadding>
-              <ListItemButton key={'Home'} sx={{ pl: 4 }}>
-                <ListItemText primary={'Home'} />
+              <ListItemButton onClick={() => navigate('/dashboard/overview')} key={'Overview'} sx={{ pl: 4 }}>
+                <ListItemText primary={'Overview'} />
               </ListItemButton>
-              <ListItemButton onClick={()=>navigate('/dashboard/members')} key={'Members'} sx={{ pl: 4 }}>
+              <ListItemButton onClick={() => navigate('/dashboard/members')} key={'Members'} sx={{ pl: 4 }}>
                 <ListItemText primary={'Members'} />
               </ListItemButton>
               <ListItemButton key={'Reports'} sx={{ pl: 4 }}>
