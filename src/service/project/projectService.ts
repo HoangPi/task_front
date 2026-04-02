@@ -256,3 +256,10 @@ export function getProjectOverview(projectId: number) {
         method: "GET"
     }).then((res) => res.data as ProjectOverview[]).catch(e => { throw e.response.data.message.split("\n")[0] })
 }
+
+export function updateRole(projectId: number, memberId: number, role: 'SM' | 'EM') {
+    return axiosService({
+        url: `project/role?projectId=${projectId}&memberId=${memberId}&role=${role}`,
+        method: "PUT"
+    }).catch(e => { throw e.response.data.message.split("\n")[0] })
+}

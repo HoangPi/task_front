@@ -7,9 +7,10 @@ import {
     Stack,
     Divider,
     IconButton,
-    Grid
+    Grid,
+    ButtonBase
 } from '@mui/material';
-import { ChevronLeft, ChevronRight } from '@mui/icons-material';
+import { ArrowDownward, ArrowUpward, ChevronLeft, ChevronRight } from '@mui/icons-material';
 import { useAppSelector } from '../../redux/hook';
 import { SelectedIndexContext } from '../project/selectItemContext';
 import { service } from '../../service';
@@ -20,38 +21,75 @@ import { ToastType } from '../../components/toast/notification';
 type Role = 'EM' | 'SM' | 'PO';
 
 export interface MemberInfoWithRole {
-    id: string; // Used as key, hidden from UI
+    id: number
     name: string;
     email: string;
     role: Role;
 }
 
 // --- Helper Component for individual member cards ---
-const MemberCard = ({ member }: { member: MemberInfoWithRole }) => (
+const MemberCard = ({ member, onUpdate }: { member: MemberInfoWithRole, onUpdate?: () => void }) => (
     <Card
         variant="outlined"
         sx={{
             display: 'flex',
-            alignItems: 'center',
-            p: 2,
+            alignItems: 'stretch', // Stretches children to fill the full height
             borderColor: '#edebe9',
             boxShadow: 'none',
             '&:hover': { boxShadow: '0 2px 8px rgba(0,0,0,0.05)' },
             transition: 'box-shadow 0.2s',
-            height: '100%'
+            height: '100%',
+            minWidth: 300,
+            overflow: 'hidden'
         }}
     >
-        <Avatar sx={{ width: 40, height: 40, bgcolor: '#0078d4', fontSize: '1rem', fontWeight: 600, mr: 2 }}>
-            {member.name.charAt(0)}
-        </Avatar>
-        <Box>
-            <Typography variant="body2" sx={{ fontWeight: 700, color: '#323130' }}>
-                {member.name}
-            </Typography>
-            <Typography variant="caption" sx={{ color: '#605e5c' }}>
-                {member.email}
-            </Typography>
+        {/* Inner wrapper for Avatar and Text */}
+        <Box sx={{ display: 'flex', alignItems: 'center', p: 2, flexGrow: 1 }}>
+            <Avatar sx={{ width: 40, height: 40, bgcolor: '#0078d4', fontSize: '1rem', fontWeight: 600, mr: 2 }}>
+                {member.name.charAt(0)}
+            </Avatar>
+
+            <Box>
+                <Typography variant="body2" sx={{ fontWeight: 700, color: '#323130' }}>
+                    {member.name}
+                </Typography>
+                <Typography variant="caption" sx={{ color: '#605e5c' }}>
+                    {member.email}
+                </Typography>
+            </Box>
         </Box>
+
+        {/* Vertical Divider */}
+        {member.role !== 'PO' && <Divider orientation="vertical" flexItem />}
+
+        {/* Full-height ButtonBase for perfect centering */}
+        {member.role === 'EM' && (
+            <ButtonBase
+                onClick={onUpdate}
+                sx={{
+                    width: 50,
+                    color: 'text.secondary',
+                    transition: 'background-color 0.2s, color 0.2s',
+                    '&:hover': { color: '#0078d4', bgcolor: '#f3f2f1' }
+                }}
+            >
+                <ArrowUpward fontSize="small" />
+            </ButtonBase>
+        )}
+
+        {member.role === 'SM' && (
+            <ButtonBase
+                onClick={onUpdate}
+                sx={{
+                    width: 50,
+                    color: 'text.secondary',
+                    transition: 'background-color 0.2s, color 0.2s',
+                    '&:hover': { color: '#d13438', bgcolor: '#fde7e9' }
+                }}
+            >
+                <ArrowDownward fontSize="small" />
+            </ButtonBase>
+        )}
     </Card>
 );
 
@@ -71,8 +109,7 @@ export const MembersPage = () => {
 
     // Pagination state for EM role
     const [emPage, setEmPage] = useState(0);
-
-    useEffect(() => {
+    const fetchMembers = () => {
         if (projects.length > 0 && projectIndex !== -1) {
             service.projectService.getMembersOfProject(projects[projectIndex].id, 'POSM', 0)
                 .then(res => {
@@ -82,6 +119,10 @@ export const MembersPage = () => {
                 .then(res => setSearchMembers(res))
                 .catch(e => toastContext?.dispatcher({ message: e, type: ToastType.ERROR }))
         }
+    }
+
+    useEffect(() => {
+        fetchMembers()
     }, [projectIndex])
 
     return (
@@ -120,7 +161,11 @@ export const MembersPage = () => {
                     <Grid container spacing={2}>
                         {scrumMasters.map(member => (
                             <Grid size={{ xs: 12, sm: 6, md: 3 }} key={member.id}>
-                                <MemberCard member={member} />
+                                <MemberCard member={member} onUpdate={() => {
+                                    service.projectService.updateRole(projects[projectIndex].id, member.id, 'EM')
+                                        .then(() => fetchMembers())
+                                        .catch((e) => toastContext?.dispatcher({ message: e, type: ToastType.ERROR }))
+                                }} />
                             </Grid>
                         ))}
                     </Grid>
@@ -175,7 +220,11 @@ export const MembersPage = () => {
                     <Grid container spacing={2}>
                         {searchMembers.map(member => (
                             <Grid size={{ xs: 12, sm: 6, md: 3 }} key={member.id}>
-                                <MemberCard member={member} />
+                                <MemberCard member={member} onUpdate={() => {
+                                    service.projectService.updateRole(projects[projectIndex].id, member.id, 'SM')
+                                        .then(() => fetchMembers())
+                                        .catch((e) => toastContext?.dispatcher({ message: e, type: ToastType.ERROR }))
+                                }} />
                             </Grid>
                         ))}
                     </Grid>
