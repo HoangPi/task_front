@@ -213,9 +213,9 @@ export default function SidebarLayout() {
               <ListItemButton onClick={() => navigate('/dashboard/members')} key={'Members'} sx={{ pl: 4 }}>
                 <ListItemText primary={'Members'} />
               </ListItemButton>
-              <ListItemButton key={'Reports'} sx={{ pl: 4 }}>
+              {/* <ListItemButton key={'Reports'} sx={{ pl: 4 }}>
                 <ListItemText primary={'Reports'} />
-              </ListItemButton>
+              </ListItemButton> */}
             </List>
           </Collapse>
 
