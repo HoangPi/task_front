@@ -103,8 +103,11 @@ export const SprintHeader = () => {
     };
     const handleCreateSprintBacklog = (backlogId: number, sprint_id: number) => {
         return service.projectService.createSprintBacklog(backlogId, sprint_id)
-            .then(() => fetchSprints())
-            .catch(e => toastContext?.dispatcher({ message: String(e), type: ToastType.ERROR }))
+            .then(() => { })
+            .catch(e => {
+                toastContext?.dispatcher({ message: String(e), type: ToastType.ERROR })
+                fetchSprints()
+            })
     }
     const fetchSprints = async () => {
         try {

@@ -19,7 +19,10 @@ const getPriorityStyles = (priority: number) => {
     }
 };
 
-export const ProductBacklogList = ({ sprint_id, createSprintBacklogHandler }: { sprint_id: number, createSprintBacklogHandler: (backlogId: number, sprint_id: number) => Promise<void | undefined> }) => {
+export const ProductBacklogList = ({ sprint_id, createSprintBacklogHandler }: {
+    sprint_id: number,
+    createSprintBacklogHandler: (backlogId: number, sprint_id: number) => Promise<void | undefined>
+}) => {
     const [productBacklogs, setProductBacklogs] = useState<ProductBacklog[]>([])
     const [nameFilter, setNameFilter] = useState("")
     const nameFilterDebounce = useDebounce(nameFilter, 500)
@@ -151,7 +154,8 @@ export const ProductBacklogList = ({ sprint_id, createSprintBacklogHandler }: { 
                                 <Button
                                     variant="text"
                                     onClick={() => {
-                                        createSprintBacklogHandler(item.id, sprint_id).then(() => fetchBacklogs())
+                                        setProductBacklogs(productBacklogs.filter(b => b.id !== item.id))
+                                        createSprintBacklogHandler(item.id, sprint_id)
                                     }}
                                     sx={{
                                         minWidth: '40px',
