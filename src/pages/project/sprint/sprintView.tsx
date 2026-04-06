@@ -125,6 +125,10 @@ export const SprintHeader = () => {
             const maxDayOfMonth = endDate.getDate()
             const end = `${toDate.year}-${toDate.month + 1}-${maxDayOfMonth}`
             const otherSprints = await service.projectService.getSprintsByRange(projectId, start, end)
+            setSprints(otherSprints)
+            if (chosenSprint) {
+                return;
+            }
             if (result.length >= 0) {
                 setChosenSprint(result[0])
             }
@@ -134,7 +138,6 @@ export const SprintHeader = () => {
             else {
                 setChosenSprint(null)
             }
-            setSprints(otherSprints)
         }
         catch (e) {
             toastContext?.dispatcher({ message: String(e), type: ToastType.ERROR });
