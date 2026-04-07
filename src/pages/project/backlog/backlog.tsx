@@ -67,7 +67,6 @@ export const ProductBacklogPage = () => {
         if (projects.length <= 0) {
             return
         }
-        console.log([projectIndex.value, includeFinished, nameFilterDebounce, offset, ascStoryPoint, ascPriority, open])
         fetchBacklogs();
     }, [projectIndex.value, includeFinished, nameFilterDebounce, offset, ascStoryPoint, ascPriority, open])
     return (
