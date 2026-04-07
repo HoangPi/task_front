@@ -76,6 +76,7 @@ export const SprintPage = ({ sprint, updateSprints, createSprintBacklogHandler }
     }
     useEffect(() => {
         fetchSprintBacklogs()
+        setLocalSprintStatus(sprint.status)
     }, [sprint.id, projectIndex.value])
     return (
         <Box sx={{ p: 3, bgcolor: '#fff', minHeight: '100vh' }}>
