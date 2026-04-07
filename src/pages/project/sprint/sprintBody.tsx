@@ -25,6 +25,7 @@ export const SprintPage = ({ sprint, updateSprints, createSprintBacklogHandler }
     const [finishDialogTitle, setFinishDialogTitle] = useState("")
     const [requireFinishInput, setRequireFinishInput] = useState(false)
     const [isFetchingBacklogs, setIsfetchingBacklogs] = useState(true)
+    const [localSprintStatus, setLocalSprintStatus] = useState(sprint.status)
     const [productBacklogRefreshKey, setProductBacklogRefreshKey] = useState(String(new Date()))
     const fetchSprintBacklogs = () => {
         setIsfetchingBacklogs(true)
@@ -43,6 +44,7 @@ export const SprintPage = ({ sprint, updateSprints, createSprintBacklogHandler }
                     toastContext?.dispatcher({ message: e, type: ToastType.ERROR });
                     fetchSprintBacklogs();
                 });
+            setLocalSprintStatus('finished')
             setBacklogs(backlogs.map((item) => {
                 if (item.status === 'finished' || item.status === 'failed') {
                     return item;
@@ -69,6 +71,7 @@ export const SprintPage = ({ sprint, updateSprints, createSprintBacklogHandler }
         })
         if (new Date(sprint.end_date) < currentDate) {
             setBacklogs(backlogs.map(item => item.status !== 'finished' ? { ...item, status: 'failed' } : item))
+            setLocalSprintStatus('finished')
         }
     }
     useEffect(() => {
@@ -145,9 +148,9 @@ export const SprintPage = ({ sprint, updateSprints, createSprintBacklogHandler }
             <Stack direction="row" spacing={2} marginTop={2} alignItems="center">
                 {/* Button 1: Finish Sprint / Finished State */}
                 <Button
-                    variant={sprint.status === 'finished' ? "outlined" : "contained"}
-                    disabled={sprint.status === 'finished'}
-                    startIcon={sprint.status === 'finished' ? <CheckCircle /> : <Flag />}
+                    variant={localSprintStatus === 'finished' ? "outlined" : "contained"}
+                    disabled={localSprintStatus === 'finished'}
+                    startIcon={localSprintStatus === 'finished' ? <CheckCircle /> : <Flag />}
                     onClick={() => {
                         setOpenFinishDialog(true)
                         setFinishDialogTitle("Finish Sprint")
@@ -176,7 +179,7 @@ export const SprintPage = ({ sprint, updateSprints, createSprintBacklogHandler }
                         }
                     }}
                 >
-                    {sprint.status === 'finished' ? 'Sprint Finished' : 'Finish Sprint'}
+                    {localSprintStatus === 'finished' ? 'Sprint Finished' : 'Finish Sprint'}
                 </Button>
 
                 {/* Button 2: Finish All */}

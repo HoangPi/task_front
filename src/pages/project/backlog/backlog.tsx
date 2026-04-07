@@ -8,6 +8,7 @@ import { useAppSelector } from "../../../redux/hook";
 import { service } from "../../../service";
 import type { ProductBacklog } from "../../../service/project/projectService";
 import { SelectedIndexContext } from "../selectItemContext";
+import { LoadingState } from "../../../components/loadingComponent";
 
 const getPriorityStyles = (priority: number) => {
     switch (priority) {
@@ -44,6 +45,7 @@ export const ProductBacklogPage = () => {
     const projects = useAppSelector(state => state.projectStorage.projects)
     const projectIndex = useContext(SelectedIndexContext);
     const toastContext = useContext(ToastContext)
+    const [isFetching, setIsfetching] = useState(false)
     const fetchBacklogs = () => {
         if (open) {
             return
@@ -51,6 +53,7 @@ export const ProductBacklogPage = () => {
         if (projects.length <= 0) {
             return
         }
+        setIsfetching(true)
         service.projectService.getProductBacklogs(
             projects[projectIndex.value].id,
             offset,
@@ -58,7 +61,10 @@ export const ProductBacklogPage = () => {
             includeFinished,
             ascStoryPoint,
             ascPriority
-        ).then(result => setProductBacklogs(result)).catch(e => toastContext?.dispatcher({ message: String(e), type: ToastType.ERROR }))
+        )
+            .then(result => setProductBacklogs(result))
+            .catch(e => toastContext?.dispatcher({ message: String(e), type: ToastType.ERROR }))
+            .finally(() => setIsfetching(false))
     }
     useEffect(() => {
         fetchBacklogs();
@@ -137,7 +143,7 @@ export const ProductBacklogPage = () => {
             </Stack>
 
             <Grid container spacing={2}>
-                {productBacklogs.map((item) => {
+                {isFetching ? <LoadingState /> : productBacklogs.map((item) => {
                     const pStyle = getPriorityStyles(item.priority);
 
                     return (
@@ -314,7 +320,7 @@ export const BacklogItemDialog: React.FC<{ open: boolean, onClose: any, backlog:
             }
         }
         catch (e) {
-            toastContext?.dispatcher({message: String(e), type: ToastType.ERROR})
+            toastContext?.dispatcher({ message: String(e), type: ToastType.ERROR })
         }
         onClose();
     };

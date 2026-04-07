@@ -19,6 +19,7 @@ import { projectService } from '../../../service/project';
 import { type Backlog, WorkItemCard } from './components/sprintCard';
 import { ToastContext } from '../../../components/toast/messageContetx';
 import { ToastType } from '../../../components/toast/notification';
+import { LoadingState } from '../../../components/loadingComponent';
 
 
 export default function AzureBoard() {
@@ -33,6 +34,7 @@ export default function AzureBoard() {
     const prev = useAppSelector(hasPrev)
     const next = useAppSelector(hasNext)
     const toastContext = useContext(ToastContext)
+    const [isFetching, setIsFetching] = useState(false)
 
     const projectIndex = useContext(SelectedIndexContext)
     const dispatch = useAppDispatch()
@@ -92,9 +94,11 @@ export default function AzureBoard() {
     }, [projectIndex.value])
 
     const getBacklogs = (currentSprintId: number) => {
+        setIsFetching(true)
         projectService.getSprintBacklogBySprintId(currentSprintId)
             .then(result => setBacklogs(result))
             .catch(() => setBacklogs([]))
+            .finally(() => setIsFetching(false))
     }
 
     useEffect(() => {
@@ -154,8 +158,10 @@ export default function AzureBoard() {
                 <Typography variant="body2" sx={{ textAlign: 'center', mb: 0.5, fontWeight: 500 }}>
                     {diff > (7 * projects[projectIndex.value].sprint_length)
                         ? "Future sprint"
-                        : diff > 0
-                            ? `${diff} day${diff > 1 ? "s" : ""} until the end of the sprint`
+                        : diff >= 0
+                            ? diff === 0
+                                ? 'Last day of the sprint'
+                                : `${diff} day${diff > 1 ? "s" : ""} until the end of the sprint`
                             : "Sprint is overdue"}
                 </Typography>
 
@@ -228,9 +234,12 @@ export default function AzureBoard() {
                             minHeight: 100,
                             overflowY: 'auto' // Optional: lets the container scroll if cards exceed page height
                         }}>
-                            {backlogs?.filter(b => b.status === item[1] && (!assignedToMe || b.task_owner === user.userId)).map(b => (
-                                <WorkItemCard key={b.id} backlog={b} reloadBacklogs={getBacklogs} />
-                            ))}
+                            {!isFetching
+                                ? backlogs?.filter(b => b.status === item[1] && (!assignedToMe || b.task_owner === user.userId)).map(b => (
+                                    <WorkItemCard key={b.id} backlog={b} reloadBacklogs={getBacklogs} />
+                                ))
+                                : <LoadingState message='' />
+                            }
                         </Box>
 
                         {/* Add Item Button */}

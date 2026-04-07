@@ -16,6 +16,7 @@ import { SelectedIndexContext } from '../project/selectItemContext';
 import { service } from '../../service';
 import { ToastContext } from '../../components/toast/messageContetx';
 import { ToastType } from '../../components/toast/notification';
+import { LoadingState } from '../../components/loadingComponent';
 
 // --- Types & Mock Data ---
 type Role = 'EM' | 'SM' | 'PO';
@@ -99,6 +100,8 @@ export const MembersPage = () => {
     const projectIndex = useContext(SelectedIndexContext).value
     const [searchMembers, setSearchMembers] = useState<MemberInfoWithRole[]>([])
     const [searchManagers, setSearchManagers] = useState<MemberInfoWithRole[]>([])
+    const [isFetchingSM, setIsFetchingSM] = useState(false)
+    const [isFetchingEM, setIsFetchingEM] = useState(false)
     const productOwners = useMemo(() => {
         return searchManagers.filter(item => item.role === 'PO')
     }, [searchManagers]);
@@ -111,6 +114,8 @@ export const MembersPage = () => {
     const [emPage, setEmPage] = useState(0);
     const fetchMembers = () => {
         if (projects.length > 0 && projectIndex !== -1) {
+            setIsFetchingEM(true)
+            setIsFetchingSM(true)
             service.projectService.getMembersOfProject(projects[projectIndex].id, 'POSM', 0)
                 .then(res => {
                     setSearchManagers(res)
@@ -118,6 +123,10 @@ export const MembersPage = () => {
                 })
                 .then(res => setSearchMembers(res))
                 .catch(e => toastContext?.dispatcher({ message: e, type: ToastType.ERROR }))
+                .finally(() => {
+                    setIsFetchingEM(false)
+                    setIsFetchingSM(false)
+                })
         }
     }
 
@@ -159,7 +168,7 @@ export const MembersPage = () => {
                         Scrum Master (SM)
                     </Typography>
                     <Grid container spacing={2}>
-                        {scrumMasters.map(member => (
+                        {isFetchingSM ? <LoadingState /> : scrumMasters.map(member => (
                             <Grid size={{ xs: 12, sm: 6, md: 3 }} key={member.id}>
                                 <MemberCard member={member} onUpdate={() => {
                                     service.projectService.updateRole(projects[projectIndex].id, member.id, 'EM')
@@ -181,17 +190,19 @@ export const MembersPage = () => {
                         </Typography>
 
                         {/* Pagination Controls */}
-                        {searchMembers.length > 0 && (
+                        {isFetchingEM ? <LoadingState /> : searchMembers.length > 0 && (
                             <Stack direction="row" alignItems="center" spacing={1}>
                                 <IconButton
                                     size="small"
                                     onClick={() => {
+                                        setIsFetchingEM(true)
                                         service.projectService.getMembersOfProject(projects[projectIndex].id, 'EM', emPage - 1)
                                             .then(res => {
                                                 setEmPage((e) => e - 1)
                                                 setSearchMembers(res)
                                             })
                                             .catch(e => toastContext?.dispatcher({ message: e, type: ToastType.ERROR }))
+                                            .finally(() => setIsFetchingEM(false))
                                     }}
                                     disabled={emPage === 0}
                                     sx={{ border: '1px solid #edebe9', borderRadius: 1 }}
@@ -201,12 +212,14 @@ export const MembersPage = () => {
                                 <IconButton
                                     size="small"
                                     onClick={() => {
+                                        setIsFetchingEM(true)
                                         service.projectService.getMembersOfProject(projects[projectIndex].id, 'EM', emPage + 1)
                                             .then(res => {
                                                 setEmPage((e) => e + 1)
                                                 setSearchMembers(res)
                                             })
                                             .catch(e => toastContext?.dispatcher({ message: e, type: ToastType.ERROR }))
+                                            .finally(() => setIsFetchingEM(false))
                                     }}
                                     disabled={searchMembers.length < 20}
                                     sx={{ border: '1px solid #edebe9', borderRadius: 1, color: '#0078d4' }}
