@@ -47,12 +47,6 @@ export const ProductBacklogPage = () => {
     const toastContext = useContext(ToastContext)
     const [isFetching, setIsfetching] = useState(false)
     const fetchBacklogs = () => {
-        if (open) {
-            return
-        }
-        if (projects.length <= 0) {
-            return
-        }
         setIsfetching(true)
         service.projectService.getProductBacklogs(
             projects[projectIndex.value].id,
@@ -67,8 +61,15 @@ export const ProductBacklogPage = () => {
             .finally(() => setIsfetching(false))
     }
     useEffect(() => {
+        if (open) {
+            return
+        }
+        if (projects.length <= 0) {
+            return
+        }
+        console.log([projectIndex.value, includeFinished, nameFilterDebounce, offset, ascStoryPoint, ascPriority, open])
         fetchBacklogs();
-    }, [projectIndex, projects, includeFinished, nameFilterDebounce, offset, ascStoryPoint, ascPriority, open])
+    }, [projectIndex.value, includeFinished, nameFilterDebounce, offset, ascStoryPoint, ascPriority, open])
     return (
         <Box
             sx={{
@@ -322,11 +323,13 @@ export const BacklogItemDialog: React.FC<{ open: boolean, onClose: any, backlog:
         catch (e) {
             toastContext?.dispatcher({ message: String(e), type: ToastType.ERROR })
         }
-        onClose();
+        finally {
+            onClose();
+        }
     };
 
     return (
-        <Dialog open={open} onClose={onClose} maxWidth="sm" fullWidth>
+        <Dialog open={open} maxWidth="sm" fullWidth>
             <DialogTitle sx={{ fontWeight: 700, borderBottom: '1px solid #edebe9', pb: 1.5 }}>
                 {backlog ? `Update product backlog #${backlog.id}` : "New product backlog"}
             </DialogTitle>
