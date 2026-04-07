@@ -1,6 +1,6 @@
 import {
     createInvites, createProductBacklog, createProject, createSprint, createSprintBacklog,
-    deleteProject, getCurrentSprint, getMembersOfProject, getProductBacklogs, getProjectOverview,
+    deleteProject, finishOverdueSprints, finishSprint, getCurrentSprint, getMembersOfProject, getProductBacklogs, getProjectOverview,
     getProjects, getSprintBacklogBySprintId, getSprintsByRange, getTaskBySprintBacklogId,
     getUserByProjectIdAndEmail, updateProductBacklog, updateRole, updateSprintBacklog, updateTasks
 } from "./projectService";
@@ -24,5 +24,7 @@ export const projectService = {
     createInvites,
     getMembersOfProject,
     getProjectOverview,
-    updateRole
+    updateRole,
+    finishOverdueSprints,
+    finishSprint
 }

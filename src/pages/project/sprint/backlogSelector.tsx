@@ -8,6 +8,7 @@ import { useAppSelector } from "../../../redux/hook";
 import { service } from "../../../service";
 import type { ProductBacklog } from "../../../service/project/projectService";
 import { SelectedIndexContext } from "../selectItemContext";
+import { LoadingState } from "../../../components/loadingComponent";
 
 // --- Helper for Priority Colors ---
 const getPriorityStyles = (priority: number) => {
@@ -32,10 +33,12 @@ export const ProductBacklogList = ({ sprint_id, createSprintBacklogHandler }: {
     const projects = useAppSelector(state => state.projectStorage.projects)
     const projectIndex = useContext(SelectedIndexContext);
     const toastContext = useContext(ToastContext)
+    const [isFetching, setIsFetching] = useState(false)
     const fetchBacklogs = () => {
         if (projects.length <= 0) {
             return
         }
+        setIsFetching(true)
         service.projectService.getProductBacklogs(
             projects[projectIndex.value].id,
             offset,
@@ -43,7 +46,10 @@ export const ProductBacklogList = ({ sprint_id, createSprintBacklogHandler }: {
             null,
             ascStoryPoint,
             ascPriority
-        ).then(result => setProductBacklogs(result)).catch(e => toastContext?.dispatcher({ message: String(e), type: ToastType.ERROR }))
+        )
+            .then(result => setProductBacklogs(result))
+            .catch(e => toastContext?.dispatcher({ message: String(e), type: ToastType.ERROR }))
+            .finally(() => setIsFetching(false))
     }
     useEffect(() => {
         fetchBacklogs();
@@ -105,76 +111,80 @@ export const ProductBacklogList = ({ sprint_id, createSprintBacklogHandler }: {
             </Stack>
 
             <Grid container spacing={2}>
-                {productBacklogs.map((item) => {
-                    const pStyle = getPriorityStyles(item.priority);
-
-                    return (
-                        <Grid size={3} key={item.id}>
-                            <Card
-                                variant="outlined"
-                                sx={{
-                                    display: 'flex', // Enable flex to allow the button to sit next to content
-                                    userSelect: 'none',
-                                    WebkitUserSelect: 'none',
-                                    WebkitUserDrag: 'none',
-                                    '&:hover': { boxShadow: '0 4px 12px rgba(0,0,0,0.1)' },
-                                    transition: 'box-shadow 0.2s',
-                                    height: '100%' // Ensures uniform height if used in a grid
-                                }}
-                            >
-                                {/* Left Side: Content */}
-                                <CardContent sx={{ p: 2, flexGrow: 1 }}>
-                                    <Stack direction="row" justifyContent="space-between" alignItems="flex-start">
-                                        <Typography variant="body2" sx={{ fontWeight: 700, mb: 1 }}>
-                                            {item.name}
-                                        </Typography>
-                                    </Stack>
-
-                                    <Stack direction="row" spacing={1} alignItems="center">
-                                        <Stack direction="row" alignItems="center" spacing={0.5}>
-                                            <FiberManualRecord sx={{ fontSize: 10, color: pStyle.color }} />
-                                            <Typography variant="caption" sx={{ fontWeight: 600 }}>
-                                                P{item.priority}
+                {isFetching
+                    ? <LoadingState />
+                    : productBacklogs.map((item) => {
+                        const pStyle = getPriorityStyles(item.priority);
+                        return (
+                            <Grid size={3} key={item.id}>
+                                <Card
+                                    variant="outlined"
+                                    sx={{
+                                        display: 'flex', // Enable flex to allow the button to sit next to content
+                                        userSelect: 'none',
+                                        WebkitUserSelect: 'none',
+                                        WebkitUserDrag: 'none',
+                                        '&:hover': { boxShadow: '0 4px 12px rgba(0,0,0,0.1)' },
+                                        transition: 'box-shadow 0.2s',
+                                        height: '100%' // Ensures uniform height if used in a grid
+                                    }}
+                                >
+                                    {/* Left Side: Content */}
+                                    <CardContent sx={{ p: 2, flexGrow: 1 }}>
+                                        <Stack direction="row" justifyContent="space-between" alignItems="flex-start">
+                                            <Typography variant="body2" sx={{ fontWeight: 700, mb: 1 }}>
+                                                {item.name}
                                             </Typography>
                                         </Stack>
 
-                                        <Chip
-                                            label={`${item.story_point} SP`}
-                                            size="small"
-                                            sx={{
-                                                height: 20,
-                                                fontSize: '0.65rem',
-                                                bgcolor: '#f3f2f1',
-                                                fontWeight: 700
-                                            }}
-                                        />
-                                    </Stack>
-                                </CardContent>
+                                        <Stack direction="row" spacing={1} alignItems="center">
+                                            <Stack direction="row" alignItems="center" spacing={0.5}>
+                                                <FiberManualRecord sx={{ fontSize: 10, color: pStyle.color }} />
+                                                <Typography variant="caption" sx={{ fontWeight: 600 }}>
+                                                    P{item.priority}
+                                                </Typography>
+                                            </Stack>
 
-                                <Button
-                                    variant="text"
-                                    onClick={() => {
-                                        setProductBacklogs(productBacklogs.filter(b => b.id !== item.id))
-                                        createSprintBacklogHandler(item.id, sprint_id)
-                                    }}
-                                    sx={{
-                                        minWidth: '40px',
-                                        p: 0,
-                                        borderRadius: 0,
-                                        borderLeft: '1px solid #edebe9',
-                                        color: 'text.secondary',
-                                        '&:hover': {
-                                            bgcolor: '#f3f2f1',
-                                            color: '#0078d4'
-                                        }
-                                    }}
-                                >
-                                    <ArrowUpward sx={{ fontSize: 18 }} />
-                                </Button>
-                            </Card>
-                        </Grid>
-                    );
-                })}
+                                            <Chip
+                                                label={`${item.story_point} SP`}
+                                                size="small"
+                                                sx={{
+                                                    height: 20,
+                                                    fontSize: '0.65rem',
+                                                    bgcolor: '#f3f2f1',
+                                                    fontWeight: 700
+                                                }}
+                                            />
+                                        </Stack>
+                                    </CardContent>
+
+                                    <Button
+                                        variant="text"
+                                        onClick={() => {
+                                            setProductBacklogs(productBacklogs.filter(b => b.id !== item.id))
+                                            createSprintBacklogHandler(item.id, sprint_id)
+                                                .catch((_e) => {
+                                                    setProductBacklogs(productBacklogs)
+                                                })
+                                        }}
+                                        sx={{
+                                            minWidth: '40px',
+                                            p: 0,
+                                            borderRadius: 0,
+                                            borderLeft: '1px solid #edebe9',
+                                            color: 'text.secondary',
+                                            '&:hover': {
+                                                bgcolor: '#f3f2f1',
+                                                color: '#0078d4'
+                                            }
+                                        }}
+                                    >
+                                        <ArrowUpward sx={{ fontSize: 18 }} />
+                                    </Button>
+                                </Card>
+                            </Grid>
+                        );
+                    })}
             </Grid>
             <Divider sx={{ my: 3 }} /> {/* Separator for the navigation row */}
             <Stack

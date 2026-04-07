@@ -65,7 +65,7 @@ const nullUser: UserSimpleInfo = {
     email: null
 }
 
-export const WorkItemDialog = ({ open, handleClose, backlog }: { open: boolean, handleClose: any, backlog: Backlog }) => {
+export const WorkItemDialog = ({ open, handleClose, backlog }: { open: boolean, handleClose: () => void, backlog: Backlog }) => {
     // --- States ---
     const toastContext = useContext(ToastContext)
     const [status, setStatus] = useState(backlog.status);

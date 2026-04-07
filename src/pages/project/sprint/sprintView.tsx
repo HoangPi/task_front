@@ -107,6 +107,8 @@ export const SprintHeader = () => {
             .catch(e => {
                 toastContext?.dispatcher({ message: String(e), type: ToastType.ERROR })
                 fetchSprints()
+                // throw error so the backlog selector can see it
+                throw e;
             })
     }
     const fetchSprints = async () => {
@@ -292,7 +294,7 @@ export const SprintHeader = () => {
                                     ? 'future' : 'current'}
                         </Box>
                     </Stack>
-                    <SprintPage sprint={chosenSprint} createSprintBacklogHandler={handleCreateSprintBacklog} />
+                    <SprintPage sprint={chosenSprint} updateSprints={setSprints} createSprintBacklogHandler={handleCreateSprintBacklog} />
                 </> : <>No sprints recently</>
             }
 

@@ -263,3 +263,17 @@ export function updateRole(projectId: number, memberId: number, role: 'SM' | 'EM
         method: "PUT"
     }).catch(e => { throw e.response.data.message.split("\n")[0] })
 }
+
+export function finishSprint(sprintId: number) {
+    return axiosService({
+        url: `sprints/finish/${sprintId}`,
+        method: "PUT"
+    }).catch(e => { throw e.response.data.message.split("\n")[0] })
+}
+
+export function finishOverdueSprints(projectId: number) {
+    return axiosService({
+        url: `sprints/finishAll/${projectId}`,
+        method: "PUT"
+    }).catch(e => { throw e.response.data.message.split("\n")[0] })
+}
