@@ -15,6 +15,9 @@ axiosService.interceptors.request.use(
         if (config.url === '/users/login') {
             config.headers.Authorization = undefined
         }
+        else if (config.url === '/users/signout') {
+            access = null
+        }
         else {
             config.headers.Authorization = `Bearer ${access}`
         }
@@ -27,7 +30,7 @@ axiosService.interceptors.request.use(
 
 axiosService.interceptors.response.use(
     (config) => {
-        if (config.config.url === "/users/login" || config.config.url === "/users/refresh"){
+        if (config.config.url === "/users/login" || config.config.url === "/users/refresh") {
             access = config.data.token
         }
         return config

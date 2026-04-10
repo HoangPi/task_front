@@ -8,6 +8,7 @@ import { AccountCircleOutlined, Circle, LogoutOutlined, Notifications } from '@m
 import { removeUserInfomation } from '../../redux/storage/user';
 import { service } from '../../service';
 import { NotificationContext } from './notificationContext';
+import { axiosService } from '../../service/axiosService';
 
 function NavAnonymous({ navigate }: { navigate: NavigateFunction }) {
     return <>
@@ -99,8 +100,14 @@ export function NavLoged({ navigate }: { navigate: NavigateFunction }) {
                                 fullWidth
                                 endIcon={<LogoutOutlined />}
                                 onClick={() => {
-                                    dispatch(removeUserInfomation());
-                                    navigate("/")
+                                    axiosService({
+                                        url: "/users/signout",
+                                        method: "GET"
+                                    })
+                                        .finally(() => {
+                                            dispatch(removeUserInfomation());
+                                            navigate("/")
+                                        })
                                 }}
                                 sx={{
                                     justifyContent: 'right', color: 'text.primary',
