@@ -64,7 +64,7 @@ function App() {
       })
       .then(() => service.projectService.getProjects())
       .then(res => dispatch(addProjectBulk(res)))
-      .catch((e) => {
+      .catch((_e) => {
         if (user.userId) {
           setToastState({ message: "Token has expired", type: ToastType.ERROR })
         }
