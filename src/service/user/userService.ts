@@ -14,8 +14,6 @@ export function logIn(username: string, password: string): Promise<User> {
         }
     })
         .then(response => {
-            localStorage.setItem("access", response.data.token)
-            localStorage.setItem("refresh", response.data.refresh)
             return jwtDecode<User>(response.data.token)
         })
         .catch(error => { throw error })

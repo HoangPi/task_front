@@ -1,5 +1,7 @@
 import axios, { AxiosError, type AxiosInstance } from "axios";
 
+let access: string | null = null;
+
 export const axiosService: AxiosInstance = axios.create(
     {
         withCredentials: true,
@@ -14,7 +16,7 @@ axiosService.interceptors.request.use(
             config.headers.Authorization = undefined
         }
         else {
-            config.headers.Authorization = `Bearer ${localStorage.getItem("access")}`
+            config.headers.Authorization = `Bearer ${access}`
         }
         return config
     },
@@ -25,6 +27,9 @@ axiosService.interceptors.request.use(
 
 axiosService.interceptors.response.use(
     (config) => {
+        if (config.config.url === "/users/login" || config.config.url === "/users/refresh"){
+            access = config.data.token
+        }
         return config
     }, (err: AxiosError) => {
         if (err.status === 401 && (err.response?.data as any).message.split("\n")[0] === 'Token has expired') {
@@ -39,15 +44,11 @@ axiosService.interceptors.response.use(
             return axiosService({
                 url: "/users/refresh",
                 method: "POST",
-                data: {
-                    refresh: localStorage.getItem("refresh")
-                },
                 headers: {
                     "x-retried": true
                 }
             }).then((res) => {
-                localStorage.setItem("access", res.data.token)
-                // The custom service should add the newest token from localstorage
+                access = res.data.token
                 return axiosService({ ...err.config })
             }).catch(e => { throw e })
         }

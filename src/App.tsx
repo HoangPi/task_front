@@ -58,10 +58,6 @@ function App() {
   }
 
   useEffect(() => {
-    if (!localStorage.getItem('access') && !localStorage.getItem('refresh')) {
-      dispatch(removeUserInfomation());
-      return
-    }
     VerifyUserSession()
       .then(res => {
         return dispatch(setUserInfo(res))
@@ -69,8 +65,6 @@ function App() {
       .then(() => service.projectService.getProjects())
       .then(res => dispatch(addProjectBulk(res)))
       .catch((e) => {
-        localStorage.removeItem("access")
-        localStorage.removeItem("refresh")
         dispatch(removeUserInfomation())
         setToastState({ message: String(e), type: ToastType.ERROR })
       })
