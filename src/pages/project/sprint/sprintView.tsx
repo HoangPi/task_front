@@ -266,12 +266,6 @@ export const SprintHeader = () => {
                                             />
                                         </MenuItem>
                                     )}
-
-                                    {/* 3. ADD BUTTON (Bottom) */}
-                                    <MenuItem onClick={() => setSprintMenuAnchor(null)} sx={{ color: '#0078d4' }}>
-                                        <ListItemIcon><AddIcon fontSize="small" sx={{ color: '#0078d4' }} /></ListItemIcon>
-                                        <ListItemText primary="New Sprint" primaryTypographyProps={{ variant: 'body2', fontWeight: 600 }} />
-                                    </MenuItem>
                                 </Menu>
                             </Box>
                         </Breadcrumbs>

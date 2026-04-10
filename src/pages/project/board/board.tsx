@@ -113,10 +113,6 @@ export default function AzureBoard() {
             {/* Board Header */}
             <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ mb: 2 }}>
                 <Typography variant="h6" sx={{ fontWeight: 600 }}>SPRINT/ {currentSprint?.name}</Typography>
-                <Stack direction="row" spacing={1}>
-                    <Button size="small" variant="contained" startIcon={<Add />}>New Item</Button>
-                    <IconButton size="small"><MoreHoriz /></IconButton>
-                </Stack>
             </Stack>
             <div style={{ width: "100%", paddingBottom: 12 }}>
                 <Box sx={{ display: "flex", justifyContent: "space-between", mb: 1, alignItems: 'center' }}>
