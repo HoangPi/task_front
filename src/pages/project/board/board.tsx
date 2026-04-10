@@ -241,22 +241,6 @@ export default function AzureBoard() {
                                 : <LoadingState message='' />
                             }
                         </Box>
-
-                        {/* Add Item Button */}
-                        <Button
-                            fullWidth
-                            startIcon={<Add />}
-                            sx={{
-                                justifyContent: 'flex-start',
-                                color: 'text.secondary',
-                                textTransform: 'none',
-                                fontSize: '0.75rem',
-                                p: 1,
-                                mt: 'auto' // Ensures it stays pinned to the bottom of the column
-                            }}
-                        >
-                            New Item
-                        </Button>
                     </Box>
                 ))}
             </Box>
