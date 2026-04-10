@@ -3,14 +3,13 @@ import {
     Box,
     Typography,
     Button,
-    IconButton,
     Stack,
     Divider,
     LinearProgress,
     Checkbox,
     FormControlLabel,
 } from '@mui/material';
-import { Add, MoreHoriz, ChevronRight, ChevronLeft } from '@mui/icons-material';
+import { ChevronRight, ChevronLeft } from '@mui/icons-material';
 import { SelectedIndexContext } from '../selectItemContext';
 import { service } from '../../../service';
 import { reduxService, useAppDispatch, useAppSelector } from '../../../redux/hook';

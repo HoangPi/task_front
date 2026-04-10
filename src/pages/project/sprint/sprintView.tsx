@@ -18,7 +18,6 @@ import {
 import {
     NavigateNext as NavigateNextIcon,
     KeyboardArrowDown as ArrowDown,
-    Add as AddIcon,
     Check,
     CalendarMonth,
     ArrowRightAlt,
