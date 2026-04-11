@@ -4,13 +4,14 @@ import type { User } from "../../redux/storage/user";
 import { axiosService } from "../axiosService";
 import { jwtDecode } from "jwt-decode"
 
-export function logIn(username: string, password: string): Promise<User> {
+export function logIn(username: string, password: string, persist: boolean): Promise<User> {
     return axiosService({
         url: '/users/login',
         method: 'post',
         data: {
             username: username,
-            password: password
+            password: password,
+            persist
         }
     })
         .then(response => {

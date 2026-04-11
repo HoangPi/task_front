@@ -26,6 +26,7 @@ export default function SignInPage() {
     const [username, setUsername] = useState('')
     const [password, setPassword] = useState('')
     const [error, setError] = useState("")
+    const [rememberMe, setRememberMe] = useState(false)
     const navigate = useNavigate();
     const dispatch = useAppDispatch();
     const [showPassword, setShowPassword] = useState(false);
@@ -34,7 +35,7 @@ export default function SignInPage() {
     const handleClickShowPassword = () => setShowPassword(!showPassword);
 
     function handleLogin(): void {
-        UserService.logIn(username, password)
+        UserService.logIn(username, password, rememberMe)
             .then(user => {
                 dispatch(setUserInfo(user))
                 navigate("/")
@@ -122,6 +123,8 @@ export default function SignInPage() {
 
                         <FormControlLabel
                             control={<Checkbox value="remember" color="primary" />}
+                            onChange={(_e, checked) => setRememberMe(checked)}
+                            checked={rememberMe}
                             label="Remember me"
                             sx={{ mt: 1 }}
                         />
