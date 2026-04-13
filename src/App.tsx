@@ -4,7 +4,7 @@ import { NavBar } from "./components/nav"
 import { useAppDispatch, useAppSelector } from "./redux/hook"
 import { removeUserInfomation, setUserInfo } from "./redux/storage/user"
 import SignInPage from "./pages/signin"
-import { useEffect, useState } from "react"
+import { useEffect, useState, type JSX } from "react"
 import { VerifyUserSession } from "./service/user/userService"
 import SidebarLayout from "./pages/project/board"
 import { GlobalToast, ToastType, type ToastState } from "./components/toast/notification"
@@ -18,6 +18,8 @@ import { NotificationContext } from "./components/nav/notificationContext"
 import { type UserNotification } from "./components/nav/navigationSmall"
 import { ServerStatusPage } from "./pages/serverStatus"
 import { axiosService } from "./service/axiosService"
+import { UserNotFoundPage } from "./components/userNotFound"
+import { NotFoundPage } from "./components/pageNotFound"
 
 function App() {
   const [isServerConnected, setIsServerConnected] = useState(false)
@@ -98,14 +100,23 @@ function App() {
           <Route index element={<HomePage />}></Route>
           <Route path="/signin" element={<SignInPage></SignInPage>} />
           <Route path="/signup" element={<SignUpPage></SignUpPage>} />
-          <Route path="/dashboard/*" element={<SidebarLayout />}></Route>
-          <Route path="/profile" element={<ProfilePage />} />
-          <Route path="/invite/project" element={<InvitationActionPage />} />
+          <Route path="/dashboard/*" element={<ProtectedRoute ><SidebarLayout /></ProtectedRoute>}></Route>
+          <Route path="/profile" element={<ProtectedRoute ><ProfilePage /></ProtectedRoute>} />
+          <Route path="/invite/project" element={<ProtectedRoute ><InvitationActionPage /></ProtectedRoute>} />
+          <Route path="*" element={<NotFoundPage />} />
         </Routes>
       </NotificationContext>
     </ToastContext>
   </>
   )
+}
+
+const ProtectedRoute = ({ children }: { children: JSX.Element }) => {
+  const user = useAppSelector(s => s.user)
+  if (!user.userId) {
+    return <UserNotFoundPage />
+  }
+  return children
 }
 
 export default App
