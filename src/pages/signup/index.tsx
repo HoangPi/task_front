@@ -16,6 +16,7 @@ import { ToastType } from '../../components/toast/notification';
 
 export const SignUpPage = () => {
     // State matching your required payload
+    const [isSending, setIsSending] = useState(false)
     const [username, setUsername] = useState('');
     const [name, setName] = useState('');
     const [email, setEmail] = useState('');
@@ -32,7 +33,16 @@ export const SignUpPage = () => {
                     navigate("/signin")
                 }, 2000);
             })
-            .catch((e) => toastContext?.dispatcher({ message: e, type: ToastType.ERROR }))
+            .catch((e) => {
+                const dupRegex = /\bduplicate\b/i;
+                if (dupRegex.test(String(e))) {
+                    toastContext?.dispatcher({ message: "Username has been taken", type: ToastType.ERROR })
+                    return
+                }
+                toastContext?.dispatcher({ message: e, type: ToastType.ERROR })
+            })
+            .finally(() => setIsSending(false))
+        setIsSending(true)
     };
 
     // Basic validation to disable button if fields are empty
@@ -112,7 +122,7 @@ export const SignUpPage = () => {
                             <Button
                                 type="submit"
                                 variant="contained"
-                                disabled={!isFormValid}
+                                disabled={!isFormValid || isSending}
                                 sx={{
                                     mt: 2,
                                     py: 1,
